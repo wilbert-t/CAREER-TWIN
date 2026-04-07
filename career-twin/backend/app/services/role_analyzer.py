@@ -4,6 +4,7 @@ import httpx
 from app.models.profile import CVProfile
 from app.models.analysis import AnalyzeRoleFitResponse
 from app.prompts.analyze_role_fit import ANALYZE_ROLE_FIT_PROMPT
+from app.services.retrieval import retrieve_projects, retrieve_trajectories
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL = "llama-3.3-70b-versatile"
@@ -15,7 +16,19 @@ def analyze_role_fit(profile: CVProfile, role: str) -> AnalyzeRoleFitResponse:
     if not api_key:
         return _mock_analysis(role)
 
-    prompt = ANALYZE_ROLE_FIT_PROMPT.format(role=role, raw_text=profile.raw_text[:4000])
+    ctx_projects = retrieve_projects(role)
+    ctx_trajectories = retrieve_trajectories(role)
+    context_parts = [p for p in [ctx_projects, ctx_trajectories] if p]
+    context_block = (
+        "Context from career knowledge base:\n" + "\n".join(context_parts) + "\n\n"
+        if context_parts else ""
+    )
+
+    prompt = ANALYZE_ROLE_FIT_PROMPT.format(
+        role=role,
+        raw_text=profile.raw_text[:4000],
+        context=context_block,
+    )
 
     with httpx.Client(timeout=60) as client:
         resp = client.post(
@@ -88,7 +101,8 @@ def _mock_analysis(role: str) -> AnalyzeRoleFitResponse:
             "long_term": "Lead ML initiatives and mentor junior engineers (2–4 years)",
         },
         evidence_items=[
-            "Python listed as primary skill — directly transferable to ML engineering",
-            "Research Assistant role shows analytical thinking and experiment design",
+            "[CV] Python listed as primary skill — directly transferable to ML engineering",
+            "[CV] Research Assistant role shows analytical thinking and experiment design",
+            "[Project] Academic data analysis project demonstrates applied statistics",
         ],
     )

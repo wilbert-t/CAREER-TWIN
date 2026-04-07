@@ -2,6 +2,7 @@ ANALYZE_ROLE_FIT_PROMPT = """\
 You are a career analyst. Given the candidate's CV and their target role, produce a \
 comprehensive career fit analysis.
 
+{context}
 Return a single JSON object with EXACTLY these fields:
 
 {{
@@ -19,13 +20,19 @@ Return a single JSON object with EXACTLY these fields:
   "resume_improvements": ["improvement 1", "improvement 2"],
   "alternative_roles": ["Role A", "Role B"],
   "goal_pathway": {{"short_term": "0-6 months goal", "mid_term": "6-18 months goal", "long_term": "2-4 years goal"}},
-  "evidence_items": ["CV line that demonstrates fit 1", "CV line that demonstrates fit 2"]
+  "evidence_items": [
+    "[CV] CV line that shows a directly transferable skill or experience",
+    "[Project] A project or portfolio item that demonstrates relevant work",
+    "[Certificate] A certification or course that supports readiness"
+  ]
 }}
 
 Rules:
 - Return ONLY valid JSON. No markdown, no commentary.
 - Be specific and personalised to this candidate's actual CV content.
 - All list fields must have at least 2 items.
+- Every evidence_items entry MUST start with exactly one of: [CV], [Project], or [Certificate].
+  If the evidence doesn't fit project or certificate, use [CV].
 
 TARGET ROLE: {role}
 

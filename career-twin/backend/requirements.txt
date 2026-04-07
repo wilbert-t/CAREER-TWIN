@@ -9,3 +9,4 @@ sentence-transformers==2.2.2
 chromadb==0.4.21
 pytest==7.4.3
 pytest-asyncio==0.23.2
+python-multipart==0.0.6

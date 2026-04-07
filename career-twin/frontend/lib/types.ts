@@ -32,3 +32,32 @@ export interface UploadResponse {
 export interface ConfirmResponse {
   profile_id: string;
 }
+
+export interface RoleSuggestion {
+  id: string;
+  title: string;
+  short_description: string;
+  preview_match_score: number;
+}
+
+export interface SuggestRolesResponse {
+  roles: RoleSuggestion[];
+}
+
+export interface AnalyzeRoleFitResponse {
+  selected_role: Record<string, unknown>;
+  match_score: Record<string, unknown>;
+  score_breakdown: Record<string, unknown>;
+  strengths: string[];
+  weaknesses: string[];
+  matched_skills: string[];
+  missing_skills: string[];
+  readiness_summary: Record<string, unknown>;
+  priority_improvements: string[];
+  learning_steps: string[];
+  possible_projects: string[];
+  resume_improvements: string[];
+  alternative_roles: string[];
+  goal_pathway: Record<string, unknown>;
+  evidence_items: string[];
+}

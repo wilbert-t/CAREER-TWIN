@@ -7,7 +7,7 @@ class RoleSuggestion(BaseModel):
     id: str
     title: str
     short_description: str
-    preview_match_score: int  # 0–100
+    preview_match_score: int = Field(..., ge=0, le=100)
 
 
 class SuggestRolesRequest(BaseModel):

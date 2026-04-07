@@ -89,6 +89,7 @@ export function MainContent({ data }: MainContentProps) {
       )}
 
       {/* Readiness */}
+      <div id="readiness-section">
       <Section title="Readiness">
         <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
           <span className="inline-block rounded-full bg-blue-100 px-3 py-0.5 text-xs font-semibold text-blue-700 mb-2">
@@ -97,6 +98,7 @@ export function MainContent({ data }: MainContentProps) {
           <p className="text-sm text-slate-700 leading-relaxed">{readiness.summary ?? "—"}</p>
         </div>
       </Section>
+      </div>
 
       {/* Strengths / Weaknesses */}
       <div className="grid grid-cols-2 gap-4 mb-8">

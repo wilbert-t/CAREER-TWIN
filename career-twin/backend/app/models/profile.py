@@ -31,6 +31,7 @@ class CVProfile(BaseModel):
 class UploadResponse(BaseModel):
     raw_text: str
     structured: CVProfile
+    parse_warning: str | None = None
 
 
 class ConfirmResponse(BaseModel):

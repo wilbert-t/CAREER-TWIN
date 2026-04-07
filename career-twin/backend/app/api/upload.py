@@ -6,6 +6,8 @@ from app.models.profile import UploadResponse
 router = APIRouter()
 
 ALLOWED_EXTENSIONS = {".pdf", ".doc", ".docx"}
+MAX_FILE_BYTES = 10 * 1024 * 1024  # 10 MB
+MIN_TEXT_LENGTH = 100  # chars — below this we warn about parse quality
 
 
 @router.post("/upload-cv", response_model=UploadResponse)
@@ -21,13 +23,27 @@ async def upload_cv(file: UploadFile = File(...)):
 
     data = await file.read()
 
+    if len(data) > MAX_FILE_BYTES:
+        raise HTTPException(
+            status_code=422,
+            detail="File too large. Maximum allowed size is 10 MB.",
+        )
+
     try:
         raw_text = extract_text_from_bytes(data, filename)
     except UnsupportedFileTypeError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
+    parse_warning: str | None = None
+    if len(raw_text.strip()) < MIN_TEXT_LENGTH:
+        parse_warning = (
+            "We had trouble extracting text from your CV. "
+            "The content below may be incomplete — please review and edit carefully."
+        )
+
     try:
         structured = structure_cv(raw_text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"CV structuring failed: {str(e)}")
-    return UploadResponse(raw_text=raw_text, structured=structured)
+
+    return UploadResponse(raw_text=raw_text, structured=structured, parse_warning=parse_warning)

@@ -27,6 +27,7 @@ export interface CVProfile {
 export interface UploadResponse {
   raw_text: string;
   structured: CVProfile;
+  parse_warning?: string | null;
 }
 
 export interface ConfirmResponse {

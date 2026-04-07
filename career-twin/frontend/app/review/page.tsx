@@ -9,6 +9,7 @@ import type { CVProfile, UploadResponse } from "@/lib/types";
 export default function ReviewPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<CVProfile | null>(null);
+  const [parseWarning, setParseWarning] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,6 +18,7 @@ export default function ReviewPage() {
     if (!raw) { router.push("/"); return; }
     const data: UploadResponse = JSON.parse(raw);
     setProfile(data.structured);
+    if (data.parse_warning) setParseWarning(data.parse_warning);
   }, [router]);
 
   async function handleConfirm(updated: CVProfile) {
@@ -44,6 +46,12 @@ export default function ReviewPage() {
             Check what we extracted. Edit anything before we build your career paths.
           </p>
         </div>
+
+        {parseWarning && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <strong>Heads up:</strong> {parseWarning}
+          </div>
+        )}
 
         <div className="rounded-2xl bg-white shadow-sm border border-slate-100 p-6">
           <ProfileForm

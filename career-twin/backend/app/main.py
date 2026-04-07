@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
 from app.api.upload import router as upload_router
+from app.api.profile import router as profile_router
 
 load_dotenv()
 
@@ -18,6 +19,7 @@ app.add_middleware(
 )
 
 app.include_router(upload_router)
+app.include_router(profile_router)
 
 
 @app.get("/health")

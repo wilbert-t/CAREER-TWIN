@@ -1,0 +1,3 @@
+{"id": "portfolio_site", "title": "Personal Portfolio Website", "description": "Build a polished portfolio to showcase projects", "skills": ["React", "CSS", "JavaScript"], "difficulty": "beginner", "duration_weeks": 2}
+{"id": "data_dashboard", "title": "Data Analytics Dashboard", "description": "Visualize public datasets with interactive charts", "skills": ["Python", "SQL", "Data Visualization"], "difficulty": "intermediate", "duration_weeks": 4}
+{"id": "api_service", "title": "REST API Backend Service", "description": "Build a scalable API for a real-world use case", "skills": ["Python", "FastAPI", "SQL", "Docker"], "difficulty": "intermediate", "duration_weeks": 6}

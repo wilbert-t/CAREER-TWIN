@@ -1,0 +1,3 @@
+{"from_role": "student", "to_role": "junior_engineer", "pathway": "Learn Python, build projects, contribute to open-source", "duration_months": 6}
+{"from_role": "junior_engineer", "to_role": "senior_engineer", "pathway": "Master system design, mentor juniors, lead technical projects", "duration_months": 36}
+{"from_role": "engineer", "to_role": "product_manager", "pathway": "Develop leadership skills, take on PM internship, understand user needs", "duration_months": 12}

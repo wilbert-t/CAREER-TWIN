@@ -1,0 +1,3 @@
+{"skill": "Python", "category": "language", "related": ["JavaScript", "SQL"], "difficulty": "beginner"}
+{"skill": "JavaScript", "category": "language", "related": ["TypeScript", "React"], "difficulty": "beginner"}
+{"skill": "Machine Learning", "category": "specialization", "related": ["Python", "Statistics"], "difficulty": "intermediate"}

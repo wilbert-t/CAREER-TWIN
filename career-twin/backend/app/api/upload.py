@@ -26,5 +26,8 @@ async def upload_cv(file: UploadFile = File(...)):
     except UnsupportedFileTypeError as e:
         raise HTTPException(status_code=422, detail=str(e))
 
-    structured = structure_cv(raw_text)
+    try:
+        structured = structure_cv(raw_text)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"CV structuring failed: {str(e)}")
     return UploadResponse(raw_text=raw_text, structured=structured)

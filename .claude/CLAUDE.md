@@ -2,9 +2,9 @@
 
 1. Read `.claude-session-log.md` to know where we left off.
 2. Read the last 30 lines of `.claude-lessons.md` to avoid repeat mistakes.
-3. Confirm the environment is active and dependencies are installed.
+3. Confirm the environment is active.
 4. Confirm required env vars exist before running anything.
-5. Read `AGENTS.md` for ownership rules and current execution mode.
+6. Confirm venv is active: `source venv/bin/activate`
 
 Update `.claude-session-log.md` during the session with:
 - What was completed this session
@@ -58,6 +58,7 @@ Core journey:
 - Pydantic
 - httpx
 - Uvicorn
+- PyMuPDF / pdfplumber (CV parsing)
 - Python 3.11+
 
 ## PDF extraction

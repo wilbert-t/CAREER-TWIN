@@ -6,7 +6,7 @@ from app.prompts.cv_structure import STRUCTURE_CV_PROMPT
 
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama3-8b-8192"
+GROQ_MODEL = "llama-3.3-70b-versatile"
 
 
 def structure_cv(raw_text: str) -> CVProfile:
@@ -30,6 +30,11 @@ def structure_cv(raw_text: str) -> CVProfile:
         resp.raise_for_status()
 
     content = resp.json()["choices"][0]["message"]["content"]
+    # Strip markdown code fences if the LLM wraps the JSON
+    content = content.strip()
+    if content.startswith("```"):
+        content = content.split("\n", 1)[-1]
+        content = content.rsplit("```", 1)[0].strip()
     data = json.loads(content)
     return _dict_to_profile(data, raw_text)
 

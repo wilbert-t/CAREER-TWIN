@@ -1,0 +1,3 @@
+{"id": "software_engineer", "title": "Software Engineer", "description": "Full-stack or backend software engineer role", "skills": ["Python", "JavaScript", "System Design", "SQL", "Git", "Testing"], "level": "mid"}
+{"id": "data_scientist", "title": "Data Scientist", "description": "Machine learning and data analysis professional", "skills": ["Python", "SQL", "Statistics", "Machine Learning", "Data Visualization", "A/B Testing"], "level": "mid"}
+{"id": "devops_engineer", "title": "DevOps Engineer", "description": "Infrastructure, CI/CD, and deployment automation", "skills": ["Docker", "Kubernetes", "AWS", "Git", "Scripting", "Linux"], "level": "mid"}

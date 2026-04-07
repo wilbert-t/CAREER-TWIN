@@ -14,6 +14,10 @@ KB_PATH = Path(__file__).resolve().parents[3] / "knowledge_base"
 # ChromaDB persists inside backend/chroma_db/
 CHROMA_PATH = Path(__file__).resolve().parents[2] / "chroma_db"
 
+# Note: skills_map.jsonl exists in the knowledge base but is intentionally not indexed here.
+# It is reserved for a future skill-matching feature. The three indexed collections
+# (roles_tech, roles_business, project_ideas, career_trajectories) cover current prompt needs.
+
 
 def _get_client():
     """Return a persistent ChromaDB client. Returns None if unavailable."""
@@ -131,7 +135,7 @@ def retrieve_projects(role_title: str) -> str:
         return ""
 
     try:
-        qr = coll.query(query_texts=[role_title], n_results=3)
+        qr = coll.query(query_texts=[role_title[:200]], n_results=3)
         titles = [m.get("title", "") for m in qr["metadatas"][0] if m.get("title")]
         if not titles:
             return ""
@@ -162,7 +166,7 @@ def retrieve_trajectories(role_title: str) -> str:
         return ""
 
     try:
-        qr = coll.query(query_texts=[role_title], n_results=2)
+        qr = coll.query(query_texts=[role_title[:200]], n_results=2)
         pathways = []
         for m in qr["metadatas"][0]:
             fr = m.get("from_role", "")

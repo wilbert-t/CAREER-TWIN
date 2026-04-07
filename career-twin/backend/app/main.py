@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+import logging
 import os
 from dotenv import load_dotenv
 from app.api.upload import router as upload_router
@@ -8,9 +10,10 @@ from app.api.roles import router as roles_router
 
 load_dotenv()
 
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="Career Twin API", version="0.1.0")
 
-# CORS config
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -24,9 +27,20 @@ app.include_router(profile_router)
 app.include_router(roles_router)
 
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """Catch all unhandled exceptions and return clean JSON instead of dropping the connection."""
+    logger.exception("Unhandled exception on %s %s", request.method, request.url.path)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An unexpected error occurred. Please try again."},
+    )
+
+
 @app.get("/health")
 def health_check():
     return {"status": "ok", "service": "career-twin-api"}
+
 
 if __name__ == "__main__":
     import uvicorn

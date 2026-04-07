@@ -2,6 +2,7 @@ SUGGEST_ROLES_PROMPT = """\
 You are a career advisor. Given the candidate's CV below, suggest exactly 3 career roles \
 that best match their background.
 
+{context}
 Return a JSON array with exactly 3 objects. Each object must have these fields:
 - "id": a short snake_case identifier (e.g. "ml_engineer")
 - "title": the role title

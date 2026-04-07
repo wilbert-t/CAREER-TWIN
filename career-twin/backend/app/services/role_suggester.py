@@ -4,6 +4,7 @@ import httpx
 from app.models.profile import CVProfile
 from app.models.analysis import RoleSuggestion
 from app.prompts.suggest_roles import SUGGEST_ROLES_PROMPT
+from app.services.retrieval import retrieve_roles
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL = "llama-3.3-70b-versatile"
@@ -15,7 +16,13 @@ def suggest_roles(profile: CVProfile) -> list[RoleSuggestion]:
     if not api_key:
         return _mock_roles()
 
-    prompt = SUGGEST_ROLES_PROMPT.format(raw_text=profile.raw_text[:4000])
+    context = retrieve_roles(profile.raw_text[:500])
+    context_block = f"Context from career knowledge base:\n{context}\n\n" if context else ""
+
+    prompt = SUGGEST_ROLES_PROMPT.format(
+        raw_text=profile.raw_text[:4000],
+        context=context_block,
+    )
 
     with httpx.Client(timeout=30) as client:
         resp = client.post(

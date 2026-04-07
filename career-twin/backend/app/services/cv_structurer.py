@@ -1,0 +1,79 @@
+import os
+import json
+import httpx
+from app.models.profile import CVProfile, Experience, Education
+from app.prompts.cv_structure import STRUCTURE_CV_PROMPT
+
+
+GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+GROQ_MODEL = "llama3-8b-8192"
+
+
+def structure_cv(raw_text: str) -> CVProfile:
+    """Call Groq LLM to convert raw CV text into a structured CVProfile."""
+    api_key = os.getenv("GROQ_API_KEY", "")
+    if not api_key:
+        return _mock_structure(raw_text)
+
+    prompt = STRUCTURE_CV_PROMPT.format(raw_text=raw_text[:4000])
+
+    with httpx.Client(timeout=30) as client:
+        resp = client.post(
+            GROQ_API_URL,
+            headers={"Authorization": f"Bearer {api_key}"},
+            json={
+                "model": GROQ_MODEL,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.2,
+            },
+        )
+        resp.raise_for_status()
+
+    content = resp.json()["choices"][0]["message"]["content"]
+    data = json.loads(content)
+    return _dict_to_profile(data, raw_text)
+
+
+def _dict_to_profile(data: dict, raw_text: str) -> CVProfile:
+    return CVProfile(
+        name=data.get("name", ""),
+        headline=data.get("headline", ""),
+        summary=data.get("summary", ""),
+        raw_text=raw_text,
+        experience=[
+            Experience(**e) for e in data.get("experience", [])
+            if isinstance(e, dict)
+        ],
+        education=[
+            Education(**e) for e in data.get("education", [])
+            if isinstance(e, dict)
+        ],
+        skills=data.get("skills", []),
+        projects=data.get("projects", []),
+        certificates=data.get("certificates", []),
+        leadership=data.get("leadership", []),
+    )
+
+
+def _mock_structure(raw_text: str) -> CVProfile:
+    """Return a plausible mock structure when no API key is set."""
+    return CVProfile(
+        name="Demo Candidate",
+        headline="Software Developer",
+        summary="A motivated developer with experience in web technologies.",
+        raw_text=raw_text,
+        skills=["Python", "JavaScript", "SQL"],
+        experience=[
+            Experience(
+                title="Intern", company="Tech Co", duration="2023–2024",
+                description="Built internal tools"
+            )
+        ],
+        education=[
+            Education(
+                degree="BSc Computer Science",
+                institution="State University",
+                year="2024"
+            )
+        ],
+    )

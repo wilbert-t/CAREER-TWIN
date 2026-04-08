@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { UploadZone } from "@/components/upload/UploadZone";
 import { uploadCV } from "@/lib/api";
 import { CareerTwinIntro } from "@/components/intro/CareerTwinIntro";
@@ -59,13 +60,60 @@ export default function UploadPage() {
         <CareerTwinIntro onComplete={() => setShowIntro(false)} />
       )}
 
-      {/* Existing upload page — unchanged, renders beneath the intro */}
-      <main className="min-h-screen flex flex-col items-center justify-center px-4 py-16">
-        <div className="w-full max-w-lg space-y-8">
+      {/* Upload page */}
+      <main className="relative min-h-screen flex flex-col items-center justify-center px-4 py-16 overflow-hidden">
+
+        {/* Decorative arc — matches loading screen */}
+        <svg
+          className="fixed inset-0 w-full h-full pointer-events-none"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ zIndex: 0 }}
+        >
+          <circle
+            cx="72%" cy="50%" r="42%"
+            fill="none"
+            stroke="#D9D4CC"
+            strokeWidth="1"
+            opacity="0.7"
+          />
+        </svg>
+
+        {/* Orbiting dot — matches loading screen */}
+        <motion.div
+          className="fixed pointer-events-none"
+          style={{ left: "72%", top: "50%", width: 0, height: 0, zIndex: 0 }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+        >
+          <div
+            className="absolute w-10 h-10 rounded-full"
+            style={{
+              backgroundColor: "#C4A882",
+              boxShadow: "0 0 20px rgba(196,168,130,1), 0 0 40px rgba(196,168,130,0.6), 0 0 80px rgba(196,168,130,0.25)",
+              transform: "translate(-50%, calc(-45vmin - 50%))",
+            }}
+          />
+        </motion.div>
+
+        {/* Content */}
+        <div className="relative w-full max-w-lg space-y-8" style={{ zIndex: 1 }}>
           <div className="text-center space-y-3">
-            <h1 className="text-4xl font-bold tracking-tight text-slate-900">
+            <motion.h1
+              className="text-4xl font-bold tracking-tight"
+              style={{
+                backgroundImage: "linear-gradient(90deg, #1C2B3A 20%, #8A7060 38%, #C4A882 45%, #EDD9B8 50%, #C4A882 55%, #8A7060 62%, #1C2B3A 80%)",
+                backgroundSize: "200% 100%",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+              initial={{ backgroundPosition: "200% center" }}
+              animate={{ backgroundPosition: "0% center" }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+            >
               Career Twin
-            </h1>
+            </motion.h1>
             <p className="text-lg text-slate-500">
               Upload your CV and discover your ideal career path.
             </p>

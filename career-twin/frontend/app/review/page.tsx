@@ -7,20 +7,38 @@ import { ProfileForm } from "@/components/review/ProfileForm";
 import { confirmProfile } from "@/lib/api";
 import type { CVProfile, UploadResponse } from "@/lib/types";
 
+function readUploadResult(): { profile: CVProfile | null; parseWarning: string | null } {
+  if (typeof window === "undefined") {
+    return { profile: null, parseWarning: null };
+  }
+
+  const raw = sessionStorage.getItem("upload_result");
+  if (!raw) {
+    return { profile: null, parseWarning: null };
+  }
+
+  try {
+    const data: UploadResponse = JSON.parse(raw);
+    return {
+      profile: data.structured,
+      parseWarning: data.parse_warning ?? null,
+    };
+  } catch {
+    return { profile: null, parseWarning: null };
+  }
+}
+
 export default function ReviewPage() {
   const router = useRouter();
-  const [profile, setProfile] = useState<CVProfile | null>(null);
-  const [parseWarning, setParseWarning] = useState<string | null>(null);
+  const [{ profile, parseWarning }] = useState(readUploadResult);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const raw = sessionStorage.getItem("upload_result");
-    if (!raw) { router.push("/"); return; }
-    const data: UploadResponse = JSON.parse(raw);
-    setProfile(data.structured);
-    if (data.parse_warning) setParseWarning(data.parse_warning);
-  }, [router]);
+    if (!profile) {
+      router.push("/");
+    }
+  }, [profile, router]);
 
   async function handleConfirm(updated: CVProfile) {
     setIsLoading(true);

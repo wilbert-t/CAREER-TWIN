@@ -6,7 +6,7 @@ from app.utils.groq_client import groq_chat_async, GROQ_MODEL, has_keys
 
 async def structure_cv(raw_text: str) -> CVProfile:
     """Call Groq LLM to convert raw CV text into a structured CVProfile."""
-    if not has_keys():
+    if not has_keys() or not raw_text.strip():
         return _mock_structure(raw_text)
 
     prompt = STRUCTURE_CV_PROMPT.format(raw_text=raw_text[:12000])

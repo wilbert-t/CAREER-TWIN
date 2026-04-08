@@ -63,6 +63,7 @@ MANDATORY RULES:
 - Do NOT award 80+ to be kind. Reserve high scores for candidates who truly earn them.
 - Do NOT include match_score in your output — it is calculated separately.
 - All list fields must have at least 2 items.
+- Every item in possible_projects MUST use a specific project title before the colon. Never use generic placeholders like "Project", "Project Idea", or "Case Study" as the title.
 - Every evidence_items entry MUST start with exactly one of: [CV], [Project], or [Certificate].
 - Return ONLY valid JSON. No markdown, no commentary.
 

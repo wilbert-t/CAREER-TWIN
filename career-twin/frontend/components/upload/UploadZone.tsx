@@ -9,18 +9,18 @@ interface UploadZoneProps {
   loadingMessage?: string;
 }
 
+const ALLOWED_EXTENSIONS = [".pdf", ".doc", ".docx"];
+
 export function UploadZone({ onUpload, isLoading, loadingMessage }: UploadZoneProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const ALLOWED = [".pdf", ".doc", ".docx"];
-
-  function validate(file: File): string | null {
+  const validate = useCallback((file: File): string | null => {
     const ext = "." + file.name.split(".").pop()?.toLowerCase();
-    if (!ALLOWED.includes(ext)) return `Unsupported type. Use PDF or DOCX.`;
+    if (!ALLOWED_EXTENSIONS.includes(ext)) return `Unsupported type. Use PDF or DOCX.`;
     if (file.size > 10 * 1024 * 1024) return "File too large. Max 10 MB.";
     return null;
-  }
+  }, []);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -33,7 +33,7 @@ export function UploadZone({ onUpload, isLoading, loadingMessage }: UploadZonePr
       setError(null);
       onUpload(file);
     },
-    [onUpload]
+    [onUpload, validate]
   );
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {

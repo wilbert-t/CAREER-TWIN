@@ -1,26 +1,59 @@
 'use client';
 
-import { CSSProperties } from 'react';
+import { CSSProperties, type ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 type TextShimmerProps = {
   children: string;
-  as?: React.ElementType;
+  as?: 'p' | 'span' | 'strong' | 'div' | 'h1' | 'h2' | 'h3';
   className?: string;
   duration?: number;
   spread?: number;
 };
 
-// Cache motion components so motion.create() is never called inside a render function
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const motionCache = new Map<React.ElementType, ReturnType<typeof motion.create<any>>>();
-function getMotionComponent(el: React.ElementType) {
-  if (!motionCache.has(el)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    motionCache.set(el, motion.create(el as any));
+function ShimmerWrapper({
+  as,
+  className,
+  children,
+  style,
+  duration,
+}: {
+  as: NonNullable<TextShimmerProps['as']>;
+  className: string;
+  children: ReactNode;
+  style: CSSProperties;
+  duration: number;
+}) {
+  const animationProps = {
+    className,
+    initial: { backgroundPosition: '100% center' },
+    animate: { backgroundPosition: '0% center' },
+    transition: {
+      repeat: Infinity,
+      duration,
+      ease: 'linear',
+    },
+    style,
+  };
+
+  switch (as) {
+    case 'span':
+      return <motion.span {...animationProps}>{children}</motion.span>;
+    case 'strong':
+      return <motion.strong {...animationProps}>{children}</motion.strong>;
+    case 'div':
+      return <motion.div {...animationProps}>{children}</motion.div>;
+    case 'h1':
+      return <motion.h1 {...animationProps}>{children}</motion.h1>;
+    case 'h2':
+      return <motion.h2 {...animationProps}>{children}</motion.h2>;
+    case 'h3':
+      return <motion.h3 {...animationProps}>{children}</motion.h3>;
+    case 'p':
+    default:
+      return <motion.p {...animationProps}>{children}</motion.p>;
   }
-  return motionCache.get(el)!;
 }
 
 export function TextShimmer({
@@ -30,24 +63,18 @@ export function TextShimmer({
   duration = 2,
   spread = 2,
 }: TextShimmerProps) {
-  const MotionComponent = getMotionComponent(Component);
   const dynamicSpread = children.length * spread;
 
   return (
-    <MotionComponent
+    <ShimmerWrapper
+      as={Component}
       className={cn(
         'relative inline-block bg-[length:250%_100%,auto] bg-clip-text text-transparent',
         '[--base-color:#a1a1aa] [--base-gradient-color:#ffffff]',
         '[background-image:linear-gradient(90deg,transparent_calc(var(--width)_-_var(--spread)),var(--base-gradient-color)_var(--width),transparent_calc(var(--width)_+_var(--spread))),linear-gradient(var(--base-color),var(--base-color))]',
         className
       )}
-      initial={{ backgroundPosition: '100% center' }}
-      animate={{ backgroundPosition: '0% center' }}
-      transition={{
-        repeat: Infinity,
-        duration,
-        ease: 'linear',
-      }}
+      duration={duration}
       style={
         {
           '--spread': `${spread}em`,
@@ -56,6 +83,6 @@ export function TextShimmer({
       }
     >
       {children}
-    </MotionComponent>
+    </ShimmerWrapper>
   );
 }

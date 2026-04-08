@@ -102,6 +102,56 @@ function normaliseImprovements(raw: unknown[]): PriorityImprovement[] {
   });
 }
 
+interface NormalizedProject {
+  title: string;
+  description: string;
+}
+
+function toTitleCase(value: string) {
+  return value
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+function deriveProjectTitle(description: string) {
+  const cleaned = description
+    .replace(/^[^a-zA-Z0-9]+/, "")
+    .replace(/\.$/, "")
+    .trim();
+
+  if (!cleaned) return "Project Idea";
+
+  const shortened = cleaned
+    .replace(/^(build|create|develop|design|analyze|conduct)\s+/i, "")
+    .split(/\s+/)
+    .slice(0, 6)
+    .join(" ");
+
+  return toTitleCase(shortened) || "Project Idea";
+}
+
+function normaliseProjects(raw: string[]): NormalizedProject[] {
+  return raw.map((project) => {
+    const value = project.trim();
+    const colonIndex = value.indexOf(":");
+    const hasDelimitedDescription = colonIndex > 0;
+
+    const rawTitle = hasDelimitedDescription ? value.slice(0, colonIndex).trim() : value;
+    const rawDescription = hasDelimitedDescription ? value.slice(colonIndex + 1).trim() : "";
+    const titleIsGeneric = /^(project|possible project|project idea|idea)$/i.test(rawTitle);
+    const looksLikeDescriptionOnly =
+      !hasDelimitedDescription && (/^(build|create|develop|design|analyze|conduct)\s+/i.test(value) || value.split(/\s+/).length > 8);
+    const description = rawDescription || (looksLikeDescriptionOnly ? value : "");
+
+    return {
+      title: titleIsGeneric || looksLikeDescriptionOnly ? deriveProjectTitle(description || value) : rawTitle,
+      description,
+    };
+  });
+}
+
 export function MainContent({ data, profileId, selectedRole }: MainContentProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalProjectName, setModalProjectName] = useState("");
@@ -128,6 +178,7 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
   const readiness = data.readiness_summary as { level?: string; summary?: string };
   const pathway = data.goal_pathway as { short_term?: string; mid_term?: string; long_term?: string };
   const improvements = normaliseImprovements(data.priority_improvements as unknown[]);
+  const projects = normaliseProjects(data.possible_projects);
 
   return (
     <div className="mx-auto max-w-5xl p-5 pb-16 sm:p-8 sm:pb-20">
@@ -221,21 +272,19 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
       {/* Possible Projects */}
       <Section id="possible-projects" title="Possible Projects">
         <div className="space-y-3">
-          {data.possible_projects.map((project, i) => {
-            const [name, ...rest] = project.split(":");
-            const shortDesc = rest.join(":").trim();
+          {projects.map((project, i) => {
             return (
               <button
                 key={i}
-                onClick={() => handleProjectClick(name.trim(), shortDesc)}
+                onClick={() => handleProjectClick(project.title, project.description)}
                 className="dashboard-card group w-full rounded-2xl p-4 text-left transition-all hover:border-[#cfd9e1] hover:bg-[#f8fbfc] hover:shadow-sm sm:p-5"
               >
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm font-semibold text-[#2f2a24]">{name.trim()}</p>
+                  <p className="text-sm font-semibold text-[#2f2a24]">{project.title}</p>
                   <span className="text-xs text-[#8c847a] transition-colors group-hover:text-[#3f5e78]">View details →</span>
                 </div>
-                {shortDesc && (
-                  <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-[#7a7268]">{shortDesc}</p>
+                {project.description && (
+                  <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-[#7a7268]">{project.description}</p>
                 )}
               </button>
             );
@@ -253,9 +302,8 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
           onRetry={() => {
             setModalDetail(null);
             setModalError(null);
-            const proj = data.possible_projects.find((p) => p.startsWith(modalProjectName));
-            const shortDesc = proj ? proj.split(":").slice(1).join(":").trim() : "";
-            loadProjectDetail(modalProjectName, shortDesc);
+            const project = projects.find((item) => item.title === modalProjectName);
+            loadProjectDetail(modalProjectName, project?.description ?? "");
           }}
         />
       )}

@@ -1,7 +1,6 @@
 "use client";
 
-import { motion, useAnimation } from "framer-motion";
-import { useEffect } from "react";
+import { motion } from "framer-motion";
 
 interface PolygonWipeProps {
   color?: string;    // fill color of the wipe shape
@@ -23,24 +22,15 @@ export function PolygonWipe({
   duration = 700,
   onComplete,
 }: PolygonWipeProps) {
-  const controls = useAnimation();
-
-  useEffect(() => {
-    controls
-      .start({
-        clipPath: STAR_FULL,
-        transition: {
-          duration: duration / 1000,
-          ease: [0.16, 1, 0.3, 1], // expo out — fast start, graceful finish
-        },
-      })
-      .then(onComplete);
-  }, [controls, duration, onComplete]);
-
   return (
     <motion.div
       initial={{ clipPath: STAR_TINY }}
-      animate={controls}
+      animate={{ clipPath: STAR_FULL }}
+      transition={{
+        duration: duration / 1000,
+        ease: [0.16, 1, 0.3, 1], // expo out — fast start, graceful finish
+      }}
+      onAnimationComplete={onComplete}
       style={{ backgroundColor: color }}
       className="fixed inset-0 z-50"
       aria-hidden="true"

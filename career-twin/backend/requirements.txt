@@ -1,5 +1,12 @@
-# Railway/production — CPU-only torch to avoid 530MB GPU download
--r requirements-base.txt
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.5.0
+python-dotenv==1.0.0
+httpx==0.25.1
+PyMuPDF==1.24.14
+pdfplumber==0.10.3
+chromadb==0.4.24
+python-multipart==0.0.6
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch==2.1.2+cpu
 sentence-transformers==2.7.0

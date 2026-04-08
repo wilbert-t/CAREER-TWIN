@@ -131,7 +131,11 @@ export default function DashboardPage() {
     }
   }
 
-  if (!analysis) return null;
+  if (!analysis) return (
+    <div className="fixed inset-0 flex items-center justify-center bg-[var(--background)]">
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#c4a882] border-t-transparent" />
+    </div>
+  );
 
   // Roles available to compare (exclude current)
   const comparableRoles = roles.filter(r => r.title !== selectedRole);

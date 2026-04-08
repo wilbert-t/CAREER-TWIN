@@ -52,7 +52,7 @@ export function UploadZone({ onUpload, isLoading, loadingMessage }: UploadZonePr
       onDrop={handleDrop}
       className={[
         "relative flex flex-col items-center justify-center gap-4",
-        "rounded-2xl border-2 border-dashed p-12 text-center",
+        "rounded-[1.75rem] border-2 border-dashed px-5 py-8 text-center sm:rounded-2xl sm:p-12",
         "transition-colors duration-200 cursor-pointer",
         isDragging ? "border-blue-500 bg-blue-50" : "border-slate-300 bg-slate-50 hover:border-slate-400",
         isLoading ? "pointer-events-none opacity-70" : "",
@@ -67,25 +67,25 @@ export function UploadZone({ onUpload, isLoading, loadingMessage }: UploadZonePr
       />
       {isLoading ? (
         <>
-          <Loader2 className="h-10 w-10 animate-spin text-blue-500" />
+          <Loader2 className="h-9 w-9 animate-spin text-blue-500 sm:h-10 sm:w-10" />
           <p className="text-sm text-slate-600">{loadingMessage ?? "Processing…"}</p>
         </>
       ) : (
         <>
-          <div className="rounded-full bg-slate-200 p-4">
-            <Upload className="h-8 w-8 text-slate-600" />
+          <div className="rounded-full bg-slate-200 p-3 sm:p-4">
+            <Upload className="h-7 w-7 text-slate-600 sm:h-8 sm:w-8" />
           </div>
           <div>
             <p className="font-semibold text-slate-700">Drop your CV here</p>
-            <p className="text-sm text-slate-500 mt-1">or click to browse · PDF or DOCX · max 10 MB</p>
+            <p className="mt-1 text-sm leading-6 text-slate-500">or tap to browse · PDF or DOCX · max 10 MB</p>
           </div>
-          <div className="flex gap-2 text-xs text-slate-400 items-center">
+          <div className="flex items-center gap-2 text-[11px] text-slate-400 sm:text-xs">
             <FileText className="h-4 w-4" /> PDF &nbsp;|&nbsp; DOCX
           </div>
         </>
       )}
       {error && (
-        <p className="text-sm text-red-500 mt-2">{error}</p>
+        <p className="mt-2 text-sm text-red-500">{error}</p>
       )}
     </div>
   );

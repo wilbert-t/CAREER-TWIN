@@ -36,7 +36,11 @@ export default function ReviewPage() {
     }
   }
 
-  if (!profile) return null;
+  if (!profile) return (
+    <div className="fixed inset-0 flex items-center justify-center bg-[var(--background)]">
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#c4a882] border-t-transparent" />
+    </div>
+  );
 
   return (
     <main className="relative min-h-screen py-12 px-6 overflow-hidden">

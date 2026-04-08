@@ -12,6 +12,17 @@ type TextShimmerProps = {
   spread?: number;
 };
 
+// Cache motion components so motion.create() is never called inside a render function
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const motionCache = new Map<React.ElementType, ReturnType<typeof motion.create<any>>>();
+function getMotionComponent(el: React.ElementType) {
+  if (!motionCache.has(el)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    motionCache.set(el, motion.create(el as any));
+  }
+  return motionCache.get(el)!;
+}
+
 export function TextShimmer({
   children,
   as: Component = 'p',
@@ -19,9 +30,7 @@ export function TextShimmer({
   duration = 2,
   spread = 2,
 }: TextShimmerProps) {
-  // motion.create() wraps any HTML element in a motion component
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const MotionComponent = motion.create(Component as any);
+  const MotionComponent = getMotionComponent(Component);
   const dynamicSpread = children.length * spread;
 
   return (

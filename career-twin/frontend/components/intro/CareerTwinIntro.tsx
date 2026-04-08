@@ -36,6 +36,7 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
   const [phase, setPhase] = useState<Phase>("loading");
   const [percent, setPercent] = useState(0);
   const [statusIdx, setStatusIdx] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   const liftFiredRef = useRef(false);
   const onCompleteRef = useRef(onComplete);
@@ -46,8 +47,23 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
   // Reduced motion: skip immediately (mount-only)
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mq.matches) { setPhase("done"); onCompleteRef.current(); }
+    if (mq.matches) { onCompleteRef.current(); }
   }, []); // intentionally mount-only
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    const syncViewport = () => setIsMobile(mq.matches);
+
+    syncViewport();
+
+    if (typeof mq.addEventListener === "function") {
+      mq.addEventListener("change", syncViewport);
+      return () => mq.removeEventListener("change", syncViewport);
+    }
+
+    mq.addListener(syncViewport);
+    return () => mq.removeListener(syncViewport);
+  }, []);
 
   // Animate progress 0→100
   useEffect(() => {
@@ -91,13 +107,33 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
   const handlePanelLifted = useCallback(() => {
     if (liftFiredRef.current) return;
     liftFiredRef.current = true;
-    setTimeout(() => { setPhase("done"); onComplete(); }, TIMING.exitDelayMs);
+    setPhase("done");
+    onComplete();
   }, [onComplete]);
+
+  useEffect(() => {
+    if (phase !== "exiting") return;
+    const id = setTimeout(() => {
+      setPhase((prev) => (prev === "exiting" ? "lifting" : prev));
+    }, TIMING.contentExitMs + 50);
+    return () => clearTimeout(id);
+  }, [phase]);
+
+  useEffect(() => {
+    if (phase !== "lifting") return;
+    const id = setTimeout(handlePanelLifted, TIMING.liftMs + TIMING.exitDelayMs);
+    return () => clearTimeout(id);
+  }, [handlePanelLifted, phase]);
 
   if (phase === "done") return null;
 
   const isExiting = phase === "exiting";
   const isLifting = phase === "lifting";
+  const arcCenterX = isMobile ? "50%" : "72%";
+  const arcRadius = isMobile ? "58%" : "42%";
+  const orbitTransform = isMobile
+    ? "translate(-50%, calc(-34vmin - 50%))"
+    : "translate(-50%, calc(-45vmin - 50%))";
 
   return (
     // Outer panel — this is what lifts off screen
@@ -118,22 +154,22 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
         aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <circle cx="72%" cy="50%" r="42%" fill="none" stroke={COLORS.arcStroke} strokeWidth="1" opacity="0.7" />
+        <circle cx={arcCenterX} cy="50%" r={arcRadius} fill="none" stroke={COLORS.arcStroke} strokeWidth="1" opacity="0.7" />
       </svg>
 
       {/* Orbiting dot — rotates around the decorative arc */}
       <motion.div
         className="absolute pointer-events-none"
-        style={{ left: "72%", top: "50%", width: 0, height: 0 }}
+        style={{ left: arcCenterX, top: "50%", width: 0, height: 0 }}
         animate={{ rotate: 360 }}
         transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
       >
         <div
-          className="absolute w-10 h-10 rounded-full"
+          className={["absolute rounded-full", isMobile ? "h-7 w-7" : "h-10 w-10"].join(" ")}
           style={{
             backgroundColor: "#C4A882",
             boxShadow: "0 0 20px rgba(196,168,130,1), 0 0 40px rgba(196,168,130,0.6), 0 0 80px rgba(196,168,130,0.25)",
-            transform: "translate(-50%, calc(-45vmin - 50%))",
+            transform: orbitTransform,
           }}
         />
       </motion.div>
@@ -167,7 +203,10 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
             y: { delay: 0.15, duration: 0.7, ease: "easeOut" },
             backgroundPosition: { delay: 0.85, duration: 2.5, repeat: Infinity, ease: "linear" },
           }}
-          className="text-7xl font-bold tracking-tight leading-none"
+          className={[
+            "font-bold tracking-tight leading-none",
+            isMobile ? "text-4xl" : "text-7xl",
+          ].join(" ")}
           style={{
             backgroundImage: "linear-gradient(90deg, #1C2B3A 20%, #8A7060 38%, #C4A882 45%, #EDD9B8 50%, #C4A882 55%, #8A7060 62%, #1C2B3A 80%)",
             backgroundSize: "200% 100%",
@@ -184,7 +223,10 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
           animate={{ opacity: 0.7 }}
           transition={{ delay: 0.45, duration: 0.6 }}
           style={{ color: COLORS.muteText }}
-          className="text-sm tracking-wide"
+          className={[
+            "tracking-wide",
+            isMobile ? "px-6 text-center text-xs" : "text-sm",
+          ].join(" ")}
         >
           Discover your strengths and map your career path
         </motion.p>
@@ -209,7 +251,10 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
         initial={{ opacity: 0 }}
         animate={isExiting || isLifting ? { opacity: 0 } : { opacity: 0.35 }}
         transition={{ delay: isExiting ? 0 : 0.8, duration: 0.5 }}
-        className="absolute bottom-8 left-8 font-mono text-[10px] leading-relaxed"
+        className={[
+          "absolute font-mono text-[10px] leading-relaxed",
+          isMobile ? "bottom-5 left-4" : "bottom-8 left-8",
+        ].join(" ")}
         style={{ color: COLORS.muteText }}
       >
         <motion.span

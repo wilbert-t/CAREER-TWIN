@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { PolygonWipe } from "./PolygonWipe";
 
 /* ─── Tuneable constants ─────────────────────────────────────────────────── */
 const COLORS = {

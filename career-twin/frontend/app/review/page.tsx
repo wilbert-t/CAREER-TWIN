@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { ProfileForm } from "@/components/review/ProfileForm";
 import { confirmProfile } from "@/lib/api";
 import type { CVProfile, UploadResponse } from "@/lib/types";
@@ -38,13 +39,61 @@ export default function ReviewPage() {
   if (!profile) return null;
 
   return (
-    <main className="min-h-screen py-12 px-6">
-      <div className="mx-auto max-w-5xl">
+    <main className="relative min-h-screen py-12 px-6 overflow-hidden">
+
+      {/* Decorative arc — matches loading screen */}
+      <svg
+        className="fixed inset-0 w-full h-full pointer-events-none"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ zIndex: 0 }}
+      >
+        <circle
+          cx="72%" cy="50%" r="42%"
+          fill="none"
+          stroke="#D9D4CC"
+          strokeWidth="1"
+          opacity="0.7"
+        />
+      </svg>
+
+      {/* Orbiting dot — matches loading screen */}
+      <motion.div
+        className="fixed pointer-events-none"
+        style={{ left: "72%", top: "50%", width: 0, height: 0, zIndex: 0 }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+      >
+        <div
+          className="absolute w-10 h-10 rounded-full"
+          style={{
+            backgroundColor: "#C4A882",
+            boxShadow: "0 0 20px rgba(196,168,130,1), 0 0 40px rgba(196,168,130,0.6), 0 0 80px rgba(196,168,130,0.25)",
+            transform: "translate(-50%, calc(-45vmin - 50%))",
+          }}
+        />
+      </motion.div>
+
+      <div className="relative mx-auto max-w-5xl" style={{ zIndex: 1 }}>
         <div className="mb-8">
           <p className="text-[11px] font-semibold tracking-widest text-slate-400 uppercase mb-1.5">
             Career Twin
           </p>
-          <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Review Your CV</h1>
+          <motion.h1
+            className="text-4xl font-bold tracking-tight"
+            style={{
+              backgroundImage: "linear-gradient(90deg, #1C2B3A 20%, #8A7060 38%, #C4A882 45%, #EDD9B8 50%, #C4A882 55%, #8A7060 62%, #1C2B3A 80%)",
+              backgroundSize: "200% 100%",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+            initial={{ backgroundPosition: "200% center" }}
+            animate={{ backgroundPosition: "0% center" }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "linear" }}
+          >
+            Review Your CV
+          </motion.h1>
           <p className="text-slate-500 mt-1.5">
             Check what we extracted. Edit anything before we build your career paths.
           </p>

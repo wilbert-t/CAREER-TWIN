@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { TextShimmer } from "@/components/core/text-shimmer";
 import { RoleCard } from "@/components/roles/RoleCard";
-import { suggestRoles, analyzeRoleFit } from "@/lib/api";
+import { suggestRoles, analyzeRoleFit, analyzeRoleFitWithRetry } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import type { RoleSuggestion, AnalyzeRoleFitResponse } from "@/lib/types";
 
@@ -33,6 +33,7 @@ export default function RolesPage() {
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
+    let cancelled = false;
     const profileId = sessionStorage.getItem("profile_id");
     if (!profileId) { router.push("/"); return; }
 
@@ -42,18 +43,21 @@ export default function RolesPage() {
           ...role,
           preview_match_score: 0,
         }));
+        if (cancelled) return;
         setRoles(allRoles);
         sessionStorage.setItem("suggested_roles", JSON.stringify(allRoles));
 
-        // Kick off full analysis for every role in parallel
+        // Re-run full analysis for every role so the cards always reflect fresh real results.
         const pending = new Set(allRoles.map((r) => r.id));
         setLoadingIds(pending);
 
-        allRoles.forEach((role) => {
-          analyzeRoleFit(profileId, role.title)
-            .then((result: AnalyzeRoleFitResponse) => {
+        void (async () => {
+          for (const role of allRoles) {
+            try {
+              const result: AnalyzeRoleFitResponse = await analyzeRoleFitWithRetry(profileId, role.title, 4);
+              if (cancelled) return;
+
               const actual = (result.match_score as { overall?: number }).overall;
-              // Update score in the card
               setRoles((prev) => {
                 const updated = prev.map((r) =>
                   r.id === role.id
@@ -63,21 +67,34 @@ export default function RolesPage() {
                 sessionStorage.setItem("suggested_roles", JSON.stringify(updated));
                 return updated;
               });
-              // Cache the full result
               sessionStorage.setItem(CACHE_KEY(role.title), JSON.stringify(result));
-            })
-            .catch(() => { /* keep preview score on error */ })
-            .finally(() => {
+            } catch {
+              if (cancelled) return;
+            } finally {
+              if (cancelled) return;
               setLoadingIds((prev) => {
                 const next = new Set(prev);
                 next.delete(role.id);
                 return next;
               });
-            });
-        });
+            }
+          }
+        })();
       })
-      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load roles."))
-      .finally(() => setLoadingRoles(false));
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to load roles.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingRoles(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   function handleCardSelect(id: string) {

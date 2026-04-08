@@ -82,6 +82,27 @@ export async function analyzeRoleFit(
   return res.json();
 }
 
+export async function analyzeRoleFitWithRetry(
+  profileId: string,
+  selectedRole: string,
+  attempts = 3
+): Promise<AnalyzeRoleFitResponse> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await analyzeRoleFit(profileId, selectedRole);
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error("Role analysis failed.");
+      if (attempt < attempts) {
+        await new Promise((resolve) => window.setTimeout(resolve, 700 * attempt));
+      }
+    }
+  }
+
+  throw lastError ?? new Error("Role analysis failed.");
+}
+
 export async function expandProject(
   profileId: string,
   role: string,

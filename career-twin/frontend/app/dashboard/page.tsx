@@ -6,8 +6,10 @@ import { LeftSidebar } from "@/components/dashboard/LeftSidebar";
 import { MainContent } from "@/components/dashboard/MainContent";
 import { RightPanel } from "@/components/dashboard/RightPanel";
 import { ToolsRow } from "@/components/dashboard/ToolsRow";
-import { analyzeRoleFit } from "@/lib/api";
+import { analyzeRoleFit, analyzeRoleFitWithRetry } from "@/lib/api";
 import type { AnalyzeRoleFitResponse, RoleSuggestion } from "@/lib/types";
+
+const CACHE_KEY = (title: string) => `analysis_cache_${title}`;
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -26,6 +28,7 @@ export default function DashboardPage() {
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     const raw = sessionStorage.getItem("analysis_result");
     if (!raw) { router.push("/roles"); return; }
     const parsedAnalysis: AnalyzeRoleFitResponse = JSON.parse(raw);
@@ -40,9 +43,11 @@ export default function DashboardPage() {
     // Sync preview_match_score with the actual analysis score for the selected role
     const actualScore = (parsedAnalysis.match_score as { overall?: number }).overall;
     if (actualScore !== undefined && role && parsedRoles.length > 0) {
-      setRoles(parsedRoles.map(r =>
+      const updatedRoles = parsedRoles.map(r =>
         r.title === role ? { ...r, preview_match_score: actualScore } : r
-      ));
+      );
+      setRoles(updatedRoles);
+      sessionStorage.setItem("suggested_roles", JSON.stringify(updatedRoles));
     } else {
       setRoles(parsedRoles);
     }
@@ -54,6 +59,52 @@ export default function DashboardPage() {
     if (profileRaw) {
       try { setCandidateName(JSON.parse(profileRaw).name ?? ""); } catch { /* ignore */ }
     }
+
+    if (pid && parsedRoles.length > 0) {
+      void (async () => {
+        for (const currentRole of parsedRoles) {
+          const currentScore = currentRole.title === role
+            ? actualScore
+            : currentRole.preview_match_score;
+
+          if ((currentScore ?? 0) > 0) {
+            continue;
+          }
+
+          try {
+            const result = await analyzeRoleFitWithRetry(pid, currentRole.title, 4);
+            if (cancelled) return;
+
+            const nextScore = (result.match_score as { overall?: number }).overall;
+            if (nextScore === undefined) {
+              continue;
+            }
+
+            if (currentRole.title === role) {
+              setAnalysis(result);
+              sessionStorage.setItem("analysis_result", JSON.stringify(result));
+            }
+
+            sessionStorage.setItem(CACHE_KEY(currentRole.title), JSON.stringify(result));
+            setRoles((prev) => {
+              const updated = prev.map((item) =>
+                item.title === currentRole.title
+                  ? { ...item, preview_match_score: nextScore }
+                  : item
+              );
+              sessionStorage.setItem("suggested_roles", JSON.stringify(updated));
+              return updated;
+            });
+          } catch {
+            if (cancelled) return;
+          }
+        }
+      })();
+    }
+
+    return () => {
+      cancelled = true;
+    };
   }, [router]);
 
   async function handleRoleSwitch(role: RoleSuggestion) {
@@ -73,9 +124,13 @@ export default function DashboardPage() {
       sessionStorage.setItem("selected_role", role.title);
       const actualScore = (result.match_score as { overall?: number }).overall;
       if (actualScore !== undefined) {
-        setRoles(prev => prev.map(r =>
-          r.title === role.title ? { ...r, preview_match_score: actualScore } : r
-        ));
+        setRoles(prev => {
+          const updated = prev.map(r =>
+            r.title === role.title ? { ...r, preview_match_score: actualScore } : r
+          );
+          sessionStorage.setItem("suggested_roles", JSON.stringify(updated));
+          return updated;
+        });
       }
       return;
     }
@@ -88,11 +143,16 @@ export default function DashboardPage() {
       setSelectedRole(role.title);
       sessionStorage.setItem("analysis_result", JSON.stringify(result));
       sessionStorage.setItem("selected_role", role.title);
+      sessionStorage.setItem(CACHE_KEY(role.title), JSON.stringify(result));
       const actualScore = (result.match_score as { overall?: number }).overall;
       if (actualScore !== undefined) {
-        setRoles(prev => prev.map(r =>
-          r.title === role.title ? { ...r, preview_match_score: actualScore } : r
-        ));
+        setRoles(prev => {
+          const updated = prev.map(r =>
+            r.title === role.title ? { ...r, preview_match_score: actualScore } : r
+          );
+          sessionStorage.setItem("suggested_roles", JSON.stringify(updated));
+          return updated;
+        });
       }
     } catch (e) {
       setSwitchError(e instanceof Error ? e.message : "Role switch failed.");

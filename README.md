@@ -119,3 +119,4 @@ The app works without a Groq API key. Every LLM service (`cv_structurer`, `role_
 The app uses ChromaDB + sentence-transformers to optionally enrich LLM prompts with relevant context from the knowledge base. This is fully optional — if ChromaDB is unavailable or the embedding model fails to load, all retrieval functions silently return empty strings and the app continues normally.
 
 The knowledge base (`career-twin/knowledge_base/`) contains JSONL files for tech roles, business roles, project ideas, career trajectories, and skills mappings.
+docker compose up --build

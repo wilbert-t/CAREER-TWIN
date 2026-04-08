@@ -1,45 +1,69 @@
 import type { RoleSuggestion } from "@/lib/types";
+import { SpeedometerArc } from "@/components/dashboard/SpeedometerArc";
 
 interface RoleCardProps {
   role: RoleSuggestion;
   selected: boolean;
+  loading?: boolean;
   onSelect: (id: string) => void;
 }
 
-export function RoleCard({ role, selected, onSelect }: RoleCardProps) {
+export function RoleCard({ role, selected, loading = false, onSelect }: RoleCardProps) {
   return (
     <button
       type="button"
       onClick={() => onSelect(role.id)}
       className={[
-        "flex flex-col items-center gap-3 rounded-2xl border-2 p-6 text-center",
-        "transition-all duration-150 cursor-pointer w-full",
+        "w-full text-left rounded-2xl border px-5 py-4 transition-all duration-150",
         selected
-          ? "border-blue-500 bg-blue-50 shadow-md"
-          : "border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm",
+          ? "border-indigo-200 bg-indigo-50 shadow-sm"
+          : "border-slate-200 bg-white hover:border-indigo-200 hover:bg-slate-50 hover:shadow-sm",
       ].join(" ")}
     >
-      {/* Score badge */}
-      <div
-        className={[
-          "flex h-14 w-14 items-center justify-center rounded-full text-lg font-extrabold",
-          selected ? "bg-blue-500 text-white" : "bg-slate-100 text-slate-600",
-        ].join(" ")}
-      >
-        {role.preview_match_score}%
+      <div className="flex items-center gap-4">
+        <div className="relative shrink-0">
+          <SpeedometerArc score={role.preview_match_score} size={72} />
+          {loading && (
+            <div className="absolute inset-0 rounded-full flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border-2 border-indigo-200 border-t-indigo-500 animate-spin" style={{ borderRadius: "50%" }} />
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <p className={[
+            "font-bold text-base leading-tight",
+            selected ? "text-indigo-900" : "text-slate-800",
+          ].join(" ")}>
+            {role.title}
+            {loading && <span className="ml-2 text-xs font-normal text-indigo-400">Analysing…</span>}
+          </p>
+          <p className={[
+            "text-sm mt-0.5 leading-snug",
+            selected ? "text-indigo-600" : "text-slate-500",
+          ].join(" ")}>
+            {role.short_description}
+          </p>
+        </div>
       </div>
 
-      <div>
-        <p className={["font-bold text-base", selected ? "text-blue-900" : "text-slate-800"].join(" ")}>
-          {role.title}
-        </p>
-        <p className="mt-1 text-sm text-slate-500 leading-snug">{role.short_description}</p>
-      </div>
-
-      {selected && (
-        <span className="rounded-full bg-blue-500 px-3 py-0.5 text-xs font-semibold text-white">
-          Selected ✓
-        </span>
+      {/* Skill chips */}
+      {role.skills && role.skills.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-3">
+          {role.skills.map((skill) => (
+            <span
+              key={skill}
+              className={[
+                "rounded-full px-2.5 py-0.5 text-xs font-medium",
+                selected
+                  ? "bg-indigo-100 text-indigo-700"
+                  : "bg-slate-100 text-slate-600",
+              ].join(" ")}
+            >
+              {skill}
+            </span>
+          ))}
+        </div>
       )}
     </button>
   );

@@ -42,7 +42,7 @@ async def upload_cv(file: UploadFile = File(...)):
         )
 
     try:
-        structured = structure_cv(raw_text)
+        structured = await structure_cv(raw_text)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"CV structuring failed: {str(e)}")
 

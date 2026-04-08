@@ -1,26 +1,27 @@
-import type { EvidenceFilter } from "./ToolsRow";
-
 interface RightPanelProps {
   evidenceItems: string[];
   resumeImprovements: string[];
-  evidenceFilter: EvidenceFilter;
 }
 
-export function RightPanel({ evidenceItems, resumeImprovements, evidenceFilter }: RightPanelProps) {
-  const filteredEvidence =
-    evidenceFilter === "all"
-      ? evidenceItems
-      : evidenceItems.filter((item) => item.startsWith(`[${evidenceFilter}]`));
+const ACTIONS = [
+  { label: "Priority Improvements", anchor: "priority-improvements" },
+  { label: "Possible Projects",     anchor: "possible-projects" },
+  { label: "Goal Pathway",          anchor: "goal-pathway" },
+];
 
-  // Strip the [TAG] prefix for display
-  const displayEvidence = filteredEvidence.map((item) =>
+function scrollTo(id: string) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+export function RightPanel({ evidenceItems, resumeImprovements }: RightPanelProps) {
+  const displayEvidence = evidenceItems.map((item) =>
     item.replace(/^\[(?:CV|Project|Certificate)\]\s*/, "")
   );
 
   function tagColor(item: string): string {
-    if (item.startsWith("[Project]")) return "bg-purple-100 text-purple-700";
-    if (item.startsWith("[Certificate]")) return "bg-green-100 text-green-700";
-    return "bg-slate-100 text-slate-500"; // CV or untagged
+    if (item.startsWith("[Project]")) return "bg-[#eaf0f4] text-[#3f5e78]";
+    if (item.startsWith("[Certificate]")) return "bg-[#e9f1ea] text-[#5b7f63]";
+    return "bg-[#f2ede4] text-[#6f675d]";
   }
 
   function tagLabel(item: string): string {
@@ -30,45 +31,63 @@ export function RightPanel({ evidenceItems, resumeImprovements, evidenceFilter }
   }
 
   return (
-    <aside className="flex flex-col gap-6 p-4 border-l border-slate-100">
-      {/* Evidence items */}
-      <div>
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Evidence from your CV
-        </p>
-        {displayEvidence.length === 0 ? (
-          <p className="text-xs text-slate-400 italic">No evidence for this filter.</p>
-        ) : (
+    <aside className="bg-[var(--surface-muted)] p-4 lg:border-l lg:border-[var(--border-soft)]">
+      <div className="space-y-5 rounded-2xl border border-[var(--border-soft)] bg-[var(--surface)] p-4">
+        <div>
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">
+          Recommended Actions
+          </p>
+          <div className="space-y-2">
+            {ACTIONS.map((action) => (
+              <button
+                key={action.anchor}
+                onClick={() => scrollTo(action.anchor)}
+                className="group flex w-full items-center justify-between rounded-xl border border-[var(--border-soft)] bg-[#fcfbf8] px-3 py-2.5 text-left text-xs font-medium text-[#4b443d] transition-colors hover:border-[#cfd9e1] hover:bg-[#f8fbfc]"
+              >
+                <span>{action.label}</span>
+                <span className="text-[#8c847a] transition-colors group-hover:text-[#3f5e78]">→</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">
+            Evidence From Your CV
+          </p>
+          {evidenceItems.length === 0 ? (
+            <p className="text-xs italic text-[#8c847a]">No evidence found.</p>
+          ) : (
+            <ul className="space-y-2">
+              {evidenceItems.map((raw, i) => (
+                <li key={i} className="rounded-xl border border-[var(--border-soft)] bg-[#fcfbf8] px-3 py-2.5 text-xs leading-relaxed text-[#5f574e]">
+                  <span
+                    className={`mr-1.5 inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold ${tagColor(raw)}`}
+                  >
+                    {tagLabel(raw)}
+                  </span>
+                  {displayEvidence[i]}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div>
+          <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">
+            CV Tips
+          </p>
           <ul className="space-y-2">
-            {filteredEvidence.map((raw, i) => (
-              <li key={i} className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600 leading-relaxed">
-                <span
-                  className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold mr-1.5 ${tagColor(raw)}`}
-                >
-                  {tagLabel(raw)}
-                </span>
-                {displayEvidence[i]}
+            {resumeImprovements.map((tip, i) => (
+              <li
+                key={i}
+                className="rounded-xl border border-[#ebdcc2] bg-[#fbf5ea] px-3 py-2.5 text-xs leading-relaxed text-[#8c6a3e]"
+              >
+                {tip}
               </li>
             ))}
           </ul>
-        )}
-      </div>
-
-      {/* CV tips */}
-      <div id="resume-section">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          CV Tips
-        </p>
-        <ul className="space-y-2">
-          {resumeImprovements.map((tip, i) => (
-            <li
-              key={i}
-              className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 leading-relaxed"
-            >
-              {tip}
-            </li>
-          ))}
-        </ul>
+        </div>
       </div>
     </aside>
   );

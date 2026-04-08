@@ -1,16 +1,15 @@
 # TITLE Parallel Futures - Session Start - do this first
 
-1. Read `.claude-session-log.md` to know where we left off.
-2. Read the last 30 lines of `.claude-lessons.md` to avoid repeat mistakes.
+1. Read `.claude/.claude-session-log.md` to know where we left off.
+2. Read the last 30 lines of `.claude/.claude-lessons.md` to avoid repeat mistakes.
 3. Confirm the environment is active.
-4. Confirm required env vars exist before running anything.
-6. Confirm venv is active: `source venv/bin/activate`
+4. Confirm venv is active: `source venv/bin/activate`
 
-Update `.claude-session-log.md` during the session with:
+Update `.claude/.claude-session-log.md` during the session with:
 - What was completed this session
 - Current blockers or open questions
 - Exact next step to resume; be specific with file, function, route, or component
-- Any new lesson also log in `.claude-lessons.md`
+- Any new lesson also log in `.claude/.claude-lessons.md`
 
 Keep only the last 10 sessions in the log.
 
@@ -22,8 +21,8 @@ Before ending any session:
 - Run the app or changed module and confirm no errors.
 - Verify at least one happy path end-to-end for the feature worked on.
 - Test one edge case such as empty CV text, malformed PDF, missing API key, invalid path selection, or empty retrieval result.
-- Update `.claude-session-log.md` with completed work, blockers, and exact next step.
-- If a mistake, surprise, or integration issue happened, append it to `.claude-lessons.md`.
+- Update `.claude/.claude-session-log.md` with completed work, blockers, and exact next step.
+- If a mistake, surprise, or integration issue happened, append it to `.claude/.claude-lessons.md`.
 
 ---
 
@@ -135,7 +134,7 @@ Static details live in reference files. Load only when relevant.
 - Read the full error and identify file, route, component, or function.
 - Fix root cause, not symptoms.
 - Verify after fixing.
-- Log new lessons in `.claude-lessons.md`.
+- Log new lessons in `.claude/.claude-lessons.md`.
 - Do not ask for information already available in logs, code, or reference files.
 
 ---

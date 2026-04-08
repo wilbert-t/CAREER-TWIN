@@ -137,9 +137,9 @@ export default function DashboardPage() {
   const comparableRoles = roles.filter(r => r.title !== selectedRole);
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "#F5F2ED" }}>
+    <div className="flex min-h-screen flex-col bg-[var(--background)] lg:h-screen lg:flex-row lg:overflow-hidden">
       {/* Left sidebar */}
-      <div className="w-1/4 flex-shrink-0 overflow-y-auto border-r border-slate-100 bg-slate-50">
+      <div className="border-b border-[var(--border-soft)] bg-[var(--surface-muted)] lg:w-[290px] lg:flex-shrink-0 lg:overflow-y-auto lg:border-b-0 lg:border-r">
         <LeftSidebar
           candidateName={candidateName}
           roles={roles}
@@ -150,7 +150,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Main area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col lg:overflow-hidden">
         <ToolsRow
           onCompare={handleCompareToggle}
           isComparing={isComparing}
@@ -160,8 +160,8 @@ export default function DashboardPage() {
 
         {/* Role picker (shown when picker is open) */}
         {comparePickerOpen && !isComparing && (
-          <div className="border-b border-slate-100 bg-slate-50 px-6 py-3">
-            <p className="mb-2 text-xs font-semibold text-slate-400 uppercase tracking-wide">
+          <div className="border-b border-[var(--border-soft)] bg-[var(--surface-muted)] px-4 py-3 sm:px-6">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">
               Choose a role to compare with:
             </p>
             <div className="flex flex-wrap gap-2">
@@ -169,7 +169,7 @@ export default function DashboardPage() {
                 <button
                   key={role.id}
                   onClick={() => handleCompareSelect(role)}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                  className="rounded-lg border border-[var(--border-soft)] bg-white px-3 py-1.5 text-xs font-medium text-[#5f574e] transition-colors hover:border-[#cfd9e1] hover:bg-[#f8fbfc] hover:text-[#3f5e78]"
                 >
                   {role.title}
                 </button>
@@ -180,7 +180,7 @@ export default function DashboardPage() {
 
         {/* Switch error banner */}
         {switchError && (
-          <div className="mx-6 mt-3 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">
+          <div className="mx-4 mt-3 rounded-lg border border-[#ead2cc] bg-[#f8eeeb] px-4 py-2 text-sm text-[#a8655b] sm:mx-6">
             {switchError} —{" "}
             <button onClick={() => setSwitchError(null)} className="underline">
               Dismiss
@@ -190,29 +190,29 @@ export default function DashboardPage() {
 
         {/* Switching overlay */}
         {isSwitching && (
-          <div className="flex flex-1 items-center justify-center text-slate-400 text-sm">
+          <div className="flex flex-1 items-center justify-center text-sm text-[#8c847a]">
             Analysing new role…
           </div>
         )}
 
         {/* Content: side-by-side when comparing, single otherwise */}
         {!isSwitching && (
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 lg:overflow-y-auto">
             {isComparing && compareAnalysis ? (
-              <div className="grid grid-cols-2 divide-x divide-slate-100 h-full">
+              <div className="grid h-full grid-cols-1 divide-y divide-[var(--border-soft)] xl:grid-cols-2 xl:divide-x xl:divide-y-0">
                 {/* Left: current role */}
-                <div className="overflow-y-auto">
-                  <div className="sticky top-0 z-10 bg-white border-b border-slate-100 px-6 py-2">
-                    <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Current</p>
-                    <p className="text-sm font-semibold text-slate-800 truncate">{selectedRole}</p>
+                <div className="xl:overflow-y-auto">
+                  <div className="sticky top-0 z-10 border-b border-[var(--border-soft)] bg-[var(--surface)] px-4 py-2 sm:px-6">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">Current</p>
+                    <p className="truncate text-sm font-semibold text-[#2f2a24]">{selectedRole}</p>
                   </div>
                   <MainContent data={analysis} profileId={profileId} selectedRole={selectedRole} />
                 </div>
                 {/* Right: compared role */}
-                <div className="overflow-y-auto">
-                  <div className="sticky top-0 z-10 bg-blue-50 border-b border-blue-100 px-6 py-2">
-                    <p className="text-xs font-semibold text-blue-400 uppercase tracking-wide">Comparing</p>
-                    <p className="text-sm font-semibold text-blue-800 truncate">{compareRole}</p>
+                <div className="xl:overflow-y-auto">
+                  <div className="sticky top-0 z-10 border-b border-[#d9e3ea] bg-[#eef3f6] px-4 py-2 sm:px-6">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#708697]">Comparing</p>
+                    <p className="truncate text-sm font-semibold text-[#2f4b61]">{compareRole}</p>
                   </div>
                   <MainContent data={compareAnalysis} profileId={profileId} selectedRole={compareRole} />
                 </div>
@@ -226,7 +226,7 @@ export default function DashboardPage() {
 
       {/* Right panel — hidden during compare, togglable */}
       {(!isComparing || rightPanelOpen) && (
-        <div className="w-60 flex-shrink-0 overflow-y-auto bg-slate-50">
+        <div className="border-t border-[var(--border-soft)] bg-[var(--surface-muted)] lg:w-64 lg:flex-shrink-0 lg:overflow-y-auto lg:border-t-0">
           <RightPanel
             evidenceItems={analysis.evidence_items}
             resumeImprovements={analysis.resume_improvements}
@@ -239,7 +239,7 @@ export default function DashboardPage() {
         <button
           onClick={() => setRightPanelOpen(prev => !prev)}
           title={rightPanelOpen ? "Close panel" : "Open panel"}
-          className="fixed right-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-center rounded-l-lg border border-r-0 border-slate-200 bg-white shadow px-2 py-4 text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors"
+          className="fixed right-0 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-l-lg border border-r-0 border-[var(--border-soft)] bg-[var(--surface)] px-2 py-4 text-[#7a7268] shadow transition-colors hover:bg-[#f8fbfc] hover:text-[#3f5e78] lg:flex"
         >
           <span className="text-base leading-none">{rightPanelOpen ? "›" : "‹"}</span>
         </button>

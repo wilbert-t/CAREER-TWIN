@@ -1,4 +1,5 @@
 import type { RoleSuggestion } from "@/lib/types";
+import { SpeedometerArc } from "./SpeedometerArc";
 
 interface LeftSidebarProps {
   candidateName: string;
@@ -16,17 +17,17 @@ export function LeftSidebar({
   isSwitching,
 }: LeftSidebarProps) {
   return (
-    <aside className="flex flex-col gap-4 p-4">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Candidate</p>
-        <p className="mt-1 font-semibold text-slate-800 truncate">{candidateName || "—"}</p>
+    <aside className="flex flex-col gap-4 p-4 sm:gap-5 sm:p-5">
+      <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface)] p-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">Candidate</p>
+        <p className="mt-1.5 truncate text-sm font-semibold text-[#2f2a24]">{candidateName || "—"}</p>
       </div>
 
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
+        <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">
           Career Paths
         </p>
-        <ul className="space-y-1">
+        <ul className="grid gap-2.5 sm:gap-3">
           {roles.map((role) => {
             const isActive = role.title === selectedRole || role.id === selectedRole;
             return (
@@ -35,32 +36,60 @@ export function LeftSidebar({
                   onClick={() => !isActive && !isSwitching && onRoleSwitch(role)}
                   disabled={isActive || isSwitching}
                   className={[
-                    "w-full text-left rounded-lg px-3 py-2 transition-colors",
+                    "w-full text-left rounded-2xl border px-3.5 py-3 transition-all duration-200",
                     isActive
-                      ? "bg-blue-500 text-white"
+                      ? "border-[#cfd9e1] bg-[#edf2f5] shadow-[0_1px_2px_rgba(47,42,36,0.04)]"
                       : isSwitching
-                      ? "text-slate-400 cursor-not-allowed"
-                      : "text-slate-600 hover:bg-slate-100 cursor-pointer",
+                      ? "border-[var(--border-soft)] bg-[var(--surface)] opacity-50 cursor-not-allowed"
+                      : "border-[var(--border-soft)] bg-[var(--surface)] hover:border-[#d2dde5] hover:bg-[#f8fbfc] cursor-pointer",
                   ].join(" ")}
                 >
-                  <p className="text-sm font-medium truncate">{role.title}</p>
-                  <p
-                    className={[
-                      "text-xs",
-                      isActive ? "text-blue-100" : "text-slate-400",
-                    ].join(" ")}
-                  >
-                    {role.preview_match_score}% match
-                  </p>
+                  <div className="flex items-center gap-3">
+                    <SpeedometerArc score={role.preview_match_score} size={56} />
+                    <div className="flex-1 min-w-0">
+                      <p className={[
+                        "text-sm font-bold leading-tight",
+                        isActive ? "text-[#2f4b61]" : "text-[#2f2a24]",
+                      ].join(" ")}>
+                        {role.title}
+                      </p>
+                      {role.short_description && (
+                        <p className={[
+                          "text-xs mt-0.5 leading-snug line-clamp-2",
+                          isActive ? "text-[#5f7a90]" : "text-[#8c847a]",
+                        ].join(" ")}>
+                          {role.short_description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {role.skills && role.skills.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {role.skills.slice(0, 3).map((skill) => (
+                        <span
+                          key={skill}
+                          className={[
+                            "rounded-full px-2 py-0.5 text-xs font-medium",
+                            isActive
+                              ? "bg-[#dbe6ed] text-[#3f5e78]"
+                              : "bg-[#f2ede4] text-[#6f675d]",
+                          ].join(" ")}
+                        >
+                          {skill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </button>
               </li>
             );
           })}
           {roles.length === 0 && (
             <li>
-              <div className="rounded-lg bg-blue-500 px-3 py-2">
-                <p className="text-sm font-medium text-white truncate">{selectedRole}</p>
-                <p className="text-xs text-blue-100">Custom role</p>
+              <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface)] px-3.5 py-3">
+                <p className="truncate text-sm font-semibold text-[#2f4b61]">{selectedRole}</p>
+                <p className="text-xs text-[#8c847a]">Custom role</p>
               </div>
             </li>
           )}

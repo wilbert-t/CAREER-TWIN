@@ -1,3 +1,4 @@
+import asyncio
 import httpx
 import os
 from pathlib import Path
@@ -28,7 +29,7 @@ try:
     print(f"Raw text: {raw_text}")
     
     print("\nStructuring CV...")
-    profile = structure_cv(raw_text)
+    profile = asyncio.run(structure_cv(raw_text))
     print(f"Profile: {profile}")
 except Exception as e:
     print(f"Error: {e}")

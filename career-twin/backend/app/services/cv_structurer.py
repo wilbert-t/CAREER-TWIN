@@ -9,16 +9,16 @@ GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL = "llama-3.3-70b-versatile"
 
 
-def structure_cv(raw_text: str) -> CVProfile:
+async def structure_cv(raw_text: str) -> CVProfile:
     """Call Groq LLM to convert raw CV text into a structured CVProfile."""
     api_key = os.getenv("GROQ_API_KEY", "")
     if not api_key:
         return _mock_structure(raw_text)
 
-    prompt = STRUCTURE_CV_PROMPT.format(raw_text=raw_text[:4000])
+    prompt = STRUCTURE_CV_PROMPT.format(raw_text=raw_text[:12000])
 
-    with httpx.Client(timeout=30) as client:
-        resp = client.post(
+    async with httpx.AsyncClient(timeout=60) as client:
+        resp = await client.post(
             GROQ_API_URL,
             headers={"Authorization": f"Bearer {api_key}"},
             json={

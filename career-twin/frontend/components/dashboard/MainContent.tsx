@@ -12,8 +12,8 @@ interface MainContentProps {
 
 function Section({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
   return (
-    <div id={id} className="mb-8 scroll-mt-16">
-      <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-400">{title}</h2>
+    <div id={id} className="mb-10 scroll-mt-16">
+      <h2 className="dashboard-section-label">{title}</h2>
       {children}
     </div>
   );
@@ -21,13 +21,13 @@ function Section({ id, title, children }: { id?: string; title: string; children
 
 function TagList({ items, color }: { items: string[]; color: "blue" | "green" | "red" | "amber" }) {
   const cls = {
-    blue: "bg-blue-50 text-blue-700",
-    green: "bg-green-50 text-green-700",
-    red: "bg-red-50 text-red-700",
-    amber: "bg-amber-50 text-amber-700",
+    blue: "bg-[#eaf0f4] text-[#3f5e78]",
+    green: "bg-[#e9f1ea] text-[#5b7f63]",
+    red: "bg-[#f4e5e0] text-[#a8655b]",
+    amber: "bg-[#f5ead8] text-[#b7864b]",
   }[color];
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-2.5">
       {items.map((item, i) => (
         <span key={i} className={`rounded-full px-3 py-1 text-sm font-medium ${cls}`}>
           {item}
@@ -39,9 +39,14 @@ function TagList({ items, color }: { items: string[]; color: "blue" | "green" | 
 
 function NumberedList({ items }: { items: string[] }) {
   return (
-    <ol className="list-decimal list-inside space-y-1">
+    <ol className="space-y-2">
       {items.map((item, i) => (
-        <li key={i} className="text-sm text-slate-700 leading-relaxed">{item}</li>
+        <li key={i} className="flex gap-3 text-sm leading-relaxed text-[#5f574e]">
+          <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[#eaf0f4] text-[11px] font-semibold text-[#3f5e78]">
+            {i + 1}
+          </span>
+          <span>{item}</span>
+        </li>
       ))}
     </ol>
   );
@@ -50,38 +55,38 @@ function NumberedList({ items }: { items: string[] }) {
 function BreakdownBar({ label, value, color }: { label: string; value: number; color: string }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="w-20 text-xs text-slate-500 capitalize">{label}</span>
-      <div className="flex-1 h-1.5 rounded-full bg-slate-200 overflow-hidden">
+      <span className="w-16 text-xs capitalize text-[#7a7268] sm:w-20">{label}</span>
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#e5ddd1]">
         <div
           className="h-full rounded-full transition-all duration-500"
           style={{ width: `${value ?? 0}%`, backgroundColor: color }}
         />
       </div>
-      <span className="text-xs font-semibold text-slate-700 w-7 text-right">{value ?? "—"}</span>
+      <span className="w-7 text-right text-xs font-semibold text-[#4b443d]">{value ?? "—"}</span>
     </div>
   );
 }
 
 const AREA_COLORS: Record<string, { bg: string; text: string }> = {
-  Skills:     { bg: "bg-blue-50",   text: "text-blue-700" },
-  Experience: { bg: "bg-violet-50", text: "text-violet-700" },
-  Education:  { bg: "bg-emerald-50",text: "text-emerald-700" },
+  Skills: { bg: "bg-[#eaf0f4]", text: "text-[#3f5e78]" },
+  Experience: { bg: "bg-[#f3eee4]", text: "text-[#6f675d]" },
+  Education: { bg: "bg-[#e9f1ea]", text: "text-[#5b7f63]" },
 };
 
 function ImprovementCard({ item }: { item: PriorityImprovement }) {
   const color = AREA_COLORS[item.area] ?? { bg: "bg-slate-50", text: "text-slate-600" };
   return (
-    <div className="rounded-xl border border-slate-100 bg-white p-4 space-y-2.5">
-      <div className="flex items-start gap-3">
+    <div className="dashboard-card space-y-3 rounded-2xl p-4 sm:p-5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-3">
         <span className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${color.bg} ${color.text}`}>
           {item.area}
         </span>
-        <p className="font-semibold text-slate-800 text-sm leading-snug">{item.title}</p>
+        <p className="text-sm font-semibold leading-snug text-[#2f2a24]">{item.title}</p>
       </div>
-      <p className="text-sm text-slate-600 leading-relaxed">{item.detail}</p>
-      <div className="flex gap-2 rounded-lg bg-slate-50 px-3 py-2">
-        <span className="flex-shrink-0 text-xs font-semibold text-slate-400 uppercase tracking-wide mt-0.5">Action</span>
-        <p className="text-sm text-slate-700 leading-relaxed">{item.action}</p>
+      <p className="text-sm leading-relaxed text-[#5f574e]">{item.detail}</p>
+      <div className="flex flex-col gap-1.5 rounded-xl bg-[#f3eee4] px-3 py-2.5 sm:flex-row sm:gap-2">
+        <span className="mt-0.5 flex-shrink-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">Action</span>
+        <p className="text-sm leading-relaxed text-[#4b443d]">{item.action}</p>
       </div>
     </div>
   );
@@ -125,20 +130,28 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
   const improvements = normaliseImprovements(data.priority_improvements as unknown[]);
 
   return (
-    <div className="p-6 pb-16">
+    <div className="mx-auto max-w-5xl p-5 pb-16 sm:p-8 sm:pb-20">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">{role.title ?? "Role Analysis"}</h1>
+      <div className="mb-8 border-b border-[var(--border-soft)] pb-5 sm:mb-10 sm:pb-6">
+        <h1 className="text-[1.75rem] font-bold tracking-[-0.02em] text-[#2f2a24] sm:text-[2rem]">{role.title ?? "Role Analysis"}</h1>
         {role.description && (
-          <p className="mt-1 text-sm text-slate-500">{role.description}</p>
+          <p className="mt-2 max-w-3xl text-sm leading-relaxed text-[#7a7268]">{role.description}</p>
         )}
       </div>
 
       {/* Match Score */}
       <Section title="Match Score">
-        <div className="flex items-center gap-6 rounded-xl border border-slate-100 bg-slate-50 p-4">
-          <SpeedometerArc score={score.overall ?? 0} size={96} showLabel labelText="Total" />
-          <div className="flex-1 space-y-3">
+        <div className="dashboard-card grid gap-5 rounded-[26px] p-4 sm:p-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center">
+          <div className="mx-auto rounded-2xl bg-[#f3eee4] p-3 md:mx-0">
+            <SpeedometerArc score={score.overall ?? 0} size={102} showLabel labelText="Total" />
+          </div>
+          <div className="space-y-4">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">Overall Fit</p>
+              <p className="mt-1 text-sm leading-relaxed text-[#5f574e]">
+                Your strongest alignment comes from academic background and core analytical skills. Experience remains the main limiter.
+              </p>
+            </div>
             {(() => {
               const barColor = scoreToArcColor(score.overall ?? 0);
               return (
@@ -150,42 +163,43 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
               );
             })()}
           </div>
-          <div className="flex-shrink-0 text-right">
-            <p className="text-xs text-slate-400">{score.label ?? "Match"}</p>
+          <div className="rounded-2xl border border-[var(--border-soft)] bg-[#fcfbf8] px-4 py-3 text-left md:text-right">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">Assessment</p>
+            <p className="mt-1 text-sm font-semibold text-[#3f5e78]">{score.label ?? "Match"}</p>
           </div>
         </div>
       </Section>
 
       {/* Readiness */}
       <Section title="Readiness">
-        <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-          <span className="inline-block rounded-full bg-blue-100 px-3 py-0.5 text-xs font-semibold text-blue-700 mb-2">
+        <div className="dashboard-card rounded-2xl p-5">
+          <span className="mb-3 inline-block rounded-full bg-[#eaf0f4] px-3 py-1 text-xs font-semibold text-[#3f5e78]">
             {readiness.level ?? "—"}
           </span>
-          <p className="text-sm text-slate-700 leading-relaxed">{readiness.summary ?? "—"}</p>
+          <p className="max-w-4xl text-sm leading-relaxed text-[#5f574e]">{readiness.summary ?? "—"}</p>
         </div>
       </Section>
 
       {/* Strengths / Weaknesses */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Strengths for this role</p>
+      <div className="mb-10 grid gap-5 lg:grid-cols-2">
+        <div className="dashboard-card rounded-2xl p-4 sm:p-5">
+          <p className="dashboard-section-label">Strengths For This Role</p>
           <TagList items={data.strengths} color="green" />
         </div>
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Weaknesses for this role</p>
+        <div className="dashboard-card rounded-2xl p-4 sm:p-5">
+          <p className="dashboard-section-label">Weaknesses For This Role</p>
           <TagList items={data.weaknesses} color="amber" />
         </div>
       </div>
 
       {/* Matched / Missing Skills */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Matched Skills</p>
+      <div className="mb-10 grid gap-5 lg:grid-cols-2">
+        <div className="dashboard-card rounded-2xl p-4 sm:p-5">
+          <p className="dashboard-section-label">Matched Skills</p>
           <TagList items={data.matched_skills} color="blue" />
         </div>
-        <div>
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Missing Skills</p>
+        <div className="dashboard-card rounded-2xl p-4 sm:p-5">
+          <p className="dashboard-section-label">Missing Skills</p>
           <TagList items={data.missing_skills} color="red" />
         </div>
       </div>
@@ -206,7 +220,7 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
 
       {/* Possible Projects */}
       <Section id="possible-projects" title="Possible Projects">
-        <div className="space-y-2">
+        <div className="space-y-3">
           {data.possible_projects.map((project, i) => {
             const [name, ...rest] = project.split(":");
             const shortDesc = rest.join(":").trim();
@@ -214,14 +228,14 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
               <button
                 key={i}
                 onClick={() => handleProjectClick(name.trim(), shortDesc)}
-                className="w-full rounded-xl border border-slate-100 bg-white p-4 text-left hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm transition-all cursor-pointer group"
+                className="dashboard-card group w-full rounded-2xl p-4 text-left transition-all hover:border-[#cfd9e1] hover:bg-[#f8fbfc] hover:shadow-sm sm:p-5"
               >
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold text-slate-800 text-sm">{name.trim()}</p>
-                  <span className="text-xs text-slate-400 group-hover:text-slate-600 transition-colors">View details →</span>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm font-semibold text-[#2f2a24]">{name.trim()}</p>
+                  <span className="text-xs text-[#8c847a] transition-colors group-hover:text-[#3f5e78]">View details →</span>
                 </div>
                 {shortDesc && (
-                  <p className="text-sm text-slate-500 mt-1">{shortDesc}</p>
+                  <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-[#7a7268]">{shortDesc}</p>
                 )}
               </button>
             );
@@ -248,14 +262,14 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
 
       {/* Goal Pathway */}
       <Section id="goal-pathway" title="Goal Pathway">
-        <div className="space-y-2">
+        <div className="space-y-3">
           {(["short_term", "mid_term", "long_term"] as const).map((key) => (
             pathway[key] && (
-              <div key={key} className="flex gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
-                <span className="flex-shrink-0 text-xs font-semibold uppercase text-slate-400 w-20 pt-0.5">
+              <div key={key} className="dashboard-card flex flex-col gap-2 rounded-2xl p-4 sm:flex-row sm:gap-4">
+                <span className="w-auto flex-shrink-0 pt-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a] sm:w-24">
                   {key.replace("_", " ")}
                 </span>
-                <p className="text-sm text-slate-700">{pathway[key]}</p>
+                <p className="text-sm leading-relaxed text-[#5f574e]">{pathway[key]}</p>
               </div>
             )
           ))}

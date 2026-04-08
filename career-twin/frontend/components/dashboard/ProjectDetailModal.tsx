@@ -13,11 +13,11 @@ interface ProjectDetailModalProps {
 
 function StarRating({ value, label }: { value: number; label: string }) {
   return (
-    <div className="flex flex-col items-center gap-1 rounded-lg border border-slate-200 bg-white px-4 py-2">
-      <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">{label}</span>
+    <div className="flex min-w-0 flex-1 flex-col items-center gap-1 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] px-3 py-2 sm:px-4">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">{label}</span>
       <div className="flex gap-0.5">
         {Array.from({ length: 5 }).map((_, i) => (
-          <span key={i} className={i < value ? "text-amber-400" : "text-slate-200"}>
+          <span key={i} className={i < value ? "text-[#b7864b]" : "text-[#ddd5c7]"}>
             ★
           </span>
         ))}
@@ -28,7 +28,7 @@ function StarRating({ value, label }: { value: number; label: string }) {
 
 function Skeleton({ className }: { className?: string }) {
   return (
-    <div className={`animate-pulse rounded bg-slate-100 ${className ?? ""}`} />
+    <div className={`animate-pulse rounded bg-[#eee7db] ${className ?? ""}`} />
   );
 }
 
@@ -49,36 +49,36 @@ export function ProjectDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(47,42,36,0.38)] p-4"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl"
+        className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[24px] border border-[var(--border-soft)] bg-[#fcfaf6] shadow-[0_20px_50px_rgba(47,42,36,0.14)]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-100 bg-white px-6 py-4">
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-[var(--border-soft)] bg-[#fcfaf6] px-4 py-4 sm:px-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-900 leading-tight">{projectName}</h2>
+            <h2 className="text-lg font-bold leading-tight text-[#2f2a24]">{projectName}</h2>
             {detail && (
-              <p className="mt-0.5 text-sm text-slate-500">{detail.short_description}</p>
+              <p className="mt-0.5 text-sm text-[#7a7268]">{detail.short_description}</p>
             )}
           </div>
           <button
             onClick={onClose}
-            className="flex-shrink-0 rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+            className="flex-shrink-0 rounded-lg p-1.5 text-[#8c847a] transition-colors hover:bg-[#f3eee4] hover:text-[#5f574e]"
           >
             ✕
           </button>
         </div>
 
-        <div className="px-6 py-5 space-y-6">
+        <div className="space-y-6 px-4 py-5 sm:px-6">
           {error ? (
-            <div className="rounded-xl bg-red-50 px-4 py-4 text-center">
-              <p className="text-sm text-red-700 mb-3">{error}</p>
+            <div className="rounded-xl border border-[#ead2cc] bg-[#f8eeeb] px-4 py-4 text-center">
+              <p className="mb-3 text-sm text-[#a8655b]">{error}</p>
               <button
                 onClick={onRetry}
-                className="rounded-lg border border-red-200 bg-white px-4 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 transition-colors"
+                className="rounded-lg border border-[#ead2cc] bg-white px-4 py-1.5 text-sm font-medium text-[#a8655b] transition-colors hover:bg-[#f8eeeb]"
               >
                 Retry
               </button>
@@ -86,35 +86,35 @@ export function ProjectDetailModal({
           ) : detail ? (
             <>
               {/* Badges */}
-              <div className="flex gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <StarRating value={detail.difficulty} label="Difficulty" />
                 <StarRating value={detail.uniqueness} label="Uniqueness" />
-                <div className="flex flex-col items-center gap-1 rounded-lg border border-slate-200 bg-white px-4 py-2">
-                  <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">Duration</span>
-                  <span className="text-sm font-semibold text-slate-700">{detail.duration}</span>
+                <div className="flex flex-col items-center gap-1 rounded-xl border border-[var(--border-soft)] bg-[var(--surface)] px-4 py-2">
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">Duration</span>
+                  <span className="text-sm font-semibold text-[#4b443d]">{detail.duration}</span>
                 </div>
               </div>
 
               {/* Description */}
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Description</p>
-                <p className="text-sm text-slate-700 leading-relaxed">{detail.description}</p>
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">Description</p>
+                <p className="text-sm leading-relaxed text-[#5f574e]">{detail.description}</p>
               </div>
 
               {/* Objectives */}
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Objectives</p>
-                <p className="text-sm text-slate-700 leading-relaxed">{detail.objectives}</p>
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">Objectives</p>
+                <p className="text-sm leading-relaxed text-[#5f574e]">{detail.objectives}</p>
               </div>
 
               {/* Tools Required */}
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Tools Required</p>
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">Tools Required</p>
                 <div className="flex flex-wrap gap-2">
                   {detail.tools_required.map((tool, i) => (
                     <span
                       key={i}
-                      className="rounded-full bg-blue-50 px-3 py-1 text-sm font-medium text-blue-700"
+                      className="rounded-full bg-[#eaf0f4] px-3 py-1 text-sm font-medium text-[#3f5e78]"
                     >
                       {tool}
                     </span>

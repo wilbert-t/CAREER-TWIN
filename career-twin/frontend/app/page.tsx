@@ -60,7 +60,7 @@ export default function UploadPage() {
       )}
 
       {/* Existing upload page — unchanged, renders beneath the intro */}
-      <main className="min-h-screen flex flex-col items-center justify-center px-4 py-16 bg-gradient-to-br from-slate-50 to-blue-50">
+      <main className="min-h-screen flex flex-col items-center justify-center px-4 py-16">
         <div className="w-full max-w-lg space-y-8">
           <div className="text-center space-y-3">
             <h1 className="text-4xl font-bold tracking-tight text-slate-900">

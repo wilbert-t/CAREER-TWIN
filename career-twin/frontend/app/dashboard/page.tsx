@@ -137,7 +137,7 @@ export default function DashboardPage() {
   const comparableRoles = roles.filter(r => r.title !== selectedRole);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white">
+    <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "#F5F2ED" }}>
       {/* Left sidebar */}
       <div className="w-1/4 flex-shrink-0 overflow-y-auto border-r border-slate-100 bg-slate-50">
         <LeftSidebar

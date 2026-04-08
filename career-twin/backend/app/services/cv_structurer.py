@@ -1,35 +1,23 @@
-import os
 import json
-import httpx
 from app.models.profile import CVProfile, Experience, Education
 from app.prompts.cv_structure import STRUCTURE_CV_PROMPT
-
-
-GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+from app.utils.groq_client import groq_chat_async, GROQ_MODEL, has_keys
 
 
 async def structure_cv(raw_text: str) -> CVProfile:
     """Call Groq LLM to convert raw CV text into a structured CVProfile."""
-    api_key = os.getenv("GROQ_API_KEY", "")
-    if not api_key:
+    if not has_keys():
         return _mock_structure(raw_text)
 
     prompt = STRUCTURE_CV_PROMPT.format(raw_text=raw_text[:12000])
 
-    async with httpx.AsyncClient(timeout=60) as client:
-        resp = await client.post(
-            GROQ_API_URL,
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={
-                "model": GROQ_MODEL,
-                "messages": [{"role": "user", "content": prompt}],
-                "temperature": 0.2,
-            },
-        )
-        resp.raise_for_status()
+    resp_data = await groq_chat_async({
+        "model": GROQ_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.2,
+    })
 
-    content = resp.json()["choices"][0]["message"]["content"]
+    content = resp_data["choices"][0]["message"]["content"]
     # Strip markdown code fences if the LLM wraps the JSON
     content = content.strip()
     if content.startswith("```"):

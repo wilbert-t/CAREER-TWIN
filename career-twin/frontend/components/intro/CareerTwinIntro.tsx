@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useState, useCallback } from "react";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { PolygonWipe } from "./PolygonWipe";
 
 /* ─── Tuneable constants ─────────────────────────────────────────────────── */
@@ -37,8 +37,10 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
   const [phase, setPhase] = useState<Phase>("loading");
   const [percent, setPercent] = useState(0);
   const [statusIdx, setStatusIdx] = useState(0);
-  const rafRef = useRef<number>(0);
-  const startRef = useRef<number>(0);
+
+  // Motion value drives progress bar directly — zero React re-renders during animation
+  const progress = useMotionValue(0);
+  const barScale = useTransform(progress, [0, 100], [0, 1]);
 
   // Skip intro entirely for users who prefer reduced motion
   useEffect(() => {
@@ -49,31 +51,26 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
     }
   }, [onComplete]);
 
-  // Smooth loading percentage via requestAnimationFrame
+  // Animate progress 0→100 using Framer's imperative animate() — no setState per frame
   useEffect(() => {
     if (phase !== "loading") return;
+    const controls = animate(progress, 100, {
+      duration: TIMING.loadingMs / 1000,
+      ease: [0.33, 1, 0.68, 1], // ease-out cubic
+      onComplete: () => setPhase("holding"),
+    });
+    return () => controls.stop();
+  }, [phase, progress]);
 
-    const animate = (ts: number) => {
-      if (!startRef.current) startRef.current = ts;
-      const elapsed = ts - startRef.current;
-      const t = Math.min(elapsed / TIMING.loadingMs, 1);
-      // Ease-out cubic — slows near 100%
-      const eased = 1 - Math.pow(1 - t, 3);
-      setPercent(Math.floor(eased * 100));
+  // Update integer counter text — fires only when integer value changes (max 100 updates)
+  useEffect(() => {
+    return progress.on("change", (v) => {
+      const int = Math.floor(v);
+      setPercent((prev) => (prev === int ? prev : int));
+    });
+  }, [progress]);
 
-      if (t < 1) {
-        rafRef.current = requestAnimationFrame(animate);
-      } else {
-        setPercent(100);
-        setPhase("holding");
-      }
-    };
-
-    rafRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [phase]);
-
-  // Rotate status line every ~900ms during loading
+  // Rotate micro-status line every 900ms during loading
   useEffect(() => {
     if (phase !== "loading") return;
     const id = setInterval(
@@ -100,7 +97,7 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
   if (phase === "done") return null;
 
   return (
-    <AnimatePresence>
+    <>
       {/* Full-screen intro overlay */}
       <div
         className="fixed inset-0 z-40 overflow-hidden select-none"
@@ -121,7 +118,7 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
             strokeWidth="1"
             opacity="0.7"
           />
-          {/* Small arc marker — travels along the circle bottom */}
+          {/* Small arc marker */}
           <circle
             cx="60%"
             cy="84%"
@@ -133,8 +130,7 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
 
         {/* ── Centered branding block ── */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-
-          {/* Loading % — small + muted, sits above the title */}
+          {/* Loading % — small + muted, above the title */}
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -167,17 +163,18 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
             Discover your strengths and map your career path
           </motion.p>
 
-          {/* Thin progress bar */}
+          {/* Thin progress bar — driven by motionValue directly, no re-renders */}
           <div
             className="mt-4 w-40 h-px rounded-full overflow-hidden"
             style={{ backgroundColor: COLORS.arcStroke }}
           >
             <motion.div
               className="h-full"
-              style={{ backgroundColor: COLORS.muteText, transformOrigin: "left" }}
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: percent / 100 }}
-              transition={{ ease: "linear", duration: 0.1 }}
+              style={{
+                backgroundColor: COLORS.muteText,
+                transformOrigin: "left",
+                scaleX: barScale,
+              }}
             />
           </div>
         </div>
@@ -190,17 +187,15 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
           className="absolute bottom-8 left-8 font-mono text-[10px] leading-relaxed"
           style={{ color: COLORS.muteText }}
         >
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={statusIdx}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {STATUS_LINES[statusIdx]}
-            </motion.span>
-          </AnimatePresence>
+          <motion.span
+            key={statusIdx}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {STATUS_LINES[statusIdx]}
+          </motion.span>
         </motion.div>
       </div>
 
@@ -212,6 +207,6 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
           onComplete={handleWipeComplete}
         />
       )}
-    </AnimatePresence>
+    </>
   );
 }

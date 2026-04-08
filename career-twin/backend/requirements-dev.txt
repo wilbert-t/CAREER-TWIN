@@ -1,0 +1,6 @@
+# Use this for local development (installs GPU torch if available)
+-r requirements-base.txt
+torch
+sentence-transformers==2.7.0
+pytest==7.4.3
+pytest-asyncio==0.23.2

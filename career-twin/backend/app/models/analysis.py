@@ -8,7 +8,7 @@ class RoleSuggestion(BaseModel):
     title: str
     short_description: str
     preview_match_score: int = Field(..., ge=0, le=100)
-    skills: list[str] = []
+    skills: list[str] = Field(default_factory=list)
 
 
 class SuggestRolesRequest(BaseModel):
@@ -57,4 +57,4 @@ class ExpandProjectResponse(BaseModel):
     duration: str
     description: str
     objectives: str
-    tools_required: list[str] = Field(default_factory=list)
+    tools_required: list[str] = Field(default_factory=list, min_length=1)

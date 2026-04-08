@@ -1,14 +1,62 @@
+import { useEffect, useRef, useState } from "react";
 import type { RoleSuggestion } from "@/lib/types";
 import { SpeedometerArc } from "@/components/dashboard/SpeedometerArc";
 
 interface RoleCardProps {
   role: RoleSuggestion;
   selected: boolean;
-  loading?: boolean;
   onSelect: (id: string) => void;
 }
 
-export function RoleCard({ role, selected, loading = false, onSelect }: RoleCardProps) {
+export function RoleCard({ role, selected, onSelect }: RoleCardProps) {
+  const [displayScore, setDisplayScore] = useState(0);
+  const frameRef = useRef<number | null>(null);
+  const displayScoreRef = useRef(0);
+
+  useEffect(() => {
+    displayScoreRef.current = displayScore;
+  }, [displayScore]);
+
+  useEffect(() => {
+    const target = Math.max(0, Math.min(100, role.preview_match_score ?? 0));
+    const start = displayScoreRef.current;
+
+    if (frameRef.current) {
+      cancelAnimationFrame(frameRef.current);
+    }
+
+    if (start === target) {
+      return;
+    }
+
+    const duration = 700;
+    const startTime = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const nextValue = Math.round(start + (target - start) * eased);
+
+      setDisplayScore(nextValue);
+
+      if (progress < 1) {
+        frameRef.current = requestAnimationFrame(tick);
+      } else {
+        frameRef.current = null;
+      }
+    };
+
+    frameRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      if (frameRef.current) {
+        cancelAnimationFrame(frameRef.current);
+        frameRef.current = null;
+      }
+    };
+  }, [role.preview_match_score]);
+
   return (
     <button
       type="button"
@@ -22,12 +70,7 @@ export function RoleCard({ role, selected, loading = false, onSelect }: RoleCard
     >
       <div className="flex items-center gap-4">
         <div className="relative shrink-0">
-          <SpeedometerArc score={role.preview_match_score} size={72} />
-          {loading && (
-            <div className="absolute inset-0 rounded-full flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border-2 border-indigo-200 border-t-indigo-500 animate-spin" style={{ borderRadius: "50%" }} />
-            </div>
-          )}
+          <SpeedometerArc score={displayScore} size={72} />
         </div>
 
         <div className="flex-1 min-w-0">
@@ -36,7 +79,6 @@ export function RoleCard({ role, selected, loading = false, onSelect }: RoleCard
             selected ? "text-indigo-900" : "text-slate-800",
           ].join(" ")}>
             {role.title}
-            {loading && <span className="ml-2 text-xs font-normal text-indigo-400">Analysing…</span>}
           </p>
           <p className={[
             "text-sm mt-0.5 leading-snug",

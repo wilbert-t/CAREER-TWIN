@@ -13,7 +13,7 @@ interface MainContentProps {
 function Section({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
   return (
     <div id={id} className="mb-10 scroll-mt-16">
-      <h2 className="dashboard-section-label">{title}</h2>
+      <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.16em] text-[#5f574e] sm:text-[15px]">{title}</h2>
       {children}
     </div>
   );
@@ -142,7 +142,7 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
       {/* Match Score */}
       <Section title="Match Score">
         <div className="dashboard-card grid gap-5 rounded-[26px] p-4 sm:p-6 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center">
-          <div className="mx-auto rounded-2xl bg-[#f3eee4] p-3 md:mx-0">
+          <div className="mx-auto rounded-2xl bg-transparent p-3 md:mx-0">
             <SpeedometerArc score={score.overall ?? 0} size={102} showLabel labelText="Total" />
           </div>
           <div className="space-y-4">
@@ -163,7 +163,7 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
               );
             })()}
           </div>
-          <div className="rounded-2xl border border-[var(--border-soft)] bg-[#fcfbf8] px-4 py-3 text-left md:text-right">
+          <div className="rounded-2xl border border-[var(--border-soft)] bg-[#fcfbf8] px-4 py-3 text-center">
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">Assessment</p>
             <p className="mt-1 text-sm font-semibold text-[#3f5e78]">{score.label ?? "Match"}</p>
           </div>
@@ -183,11 +183,11 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
       {/* Strengths / Weaknesses */}
       <div className="mb-10 grid gap-5 lg:grid-cols-2">
         <div className="dashboard-card rounded-2xl p-4 sm:p-5">
-          <p className="dashboard-section-label">Strengths For This Role</p>
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.16em] text-[#5f574e] sm:text-[15px]">Strengths For This Role</p>
           <TagList items={data.strengths} color="green" />
         </div>
         <div className="dashboard-card rounded-2xl p-4 sm:p-5">
-          <p className="dashboard-section-label">Weaknesses For This Role</p>
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.16em] text-[#5f574e] sm:text-[15px]">Weaknesses For This Role</p>
           <TagList items={data.weaknesses} color="amber" />
         </div>
       </div>
@@ -195,11 +195,11 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
       {/* Matched / Missing Skills */}
       <div className="mb-10 grid gap-5 lg:grid-cols-2">
         <div className="dashboard-card rounded-2xl p-4 sm:p-5">
-          <p className="dashboard-section-label">Matched Skills</p>
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.16em] text-[#5f574e] sm:text-[15px]">Matched Skills</p>
           <TagList items={data.matched_skills} color="blue" />
         </div>
         <div className="dashboard-card rounded-2xl p-4 sm:p-5">
-          <p className="dashboard-section-label">Missing Skills</p>
+          <p className="mb-3 text-sm font-bold uppercase tracking-[0.16em] text-[#5f574e] sm:text-[15px]">Missing Skills</p>
           <TagList items={data.missing_skills} color="red" />
         </div>
       </div>

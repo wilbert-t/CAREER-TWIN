@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { TextShimmer } from "@/components/core/text-shimmer";
 import { RoleCard } from "@/components/roles/RoleCard";
 import { suggestRoles, analyzeRoleFit } from "@/lib/api";
 import { Loader2 } from "lucide-react";
@@ -15,6 +17,8 @@ const ANALYSIS_MESSAGES = [
 ];
 
 const CACHE_KEY = (title: string) => `analysis_cache_${title}`;
+const HEADER_TRANSITION = { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const };
+const ROLE_LIST_TRANSITION = { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const };
 
 export default function RolesPage() {
   const router = useRouter();
@@ -34,7 +38,10 @@ export default function RolesPage() {
 
     suggestRoles(profileId)
       .then((data) => {
-        const allRoles = data.roles;
+        const allRoles = data.roles.map((role) => ({
+          ...role,
+          preview_match_score: 0,
+        }));
         setRoles(allRoles);
         sessionStorage.setItem("suggested_roles", JSON.stringify(allRoles));
 
@@ -137,29 +144,73 @@ export default function RolesPage() {
   const allAnalysed = loadingIds.size === 0 && roles.length > 0;
 
   return (
-    <main className="min-h-screen py-12 px-4">
-      <div className="mx-auto max-w-xl space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold text-slate-900">Your Career Paths</h1>
+    <main className="min-h-screen bg-[var(--background)] px-4 py-12">
+      <motion.div
+        layout
+        transition={HEADER_TRANSITION}
+        className={[
+          "mx-auto",
+          loadingRoles
+            ? "flex min-h-[72vh] max-w-2xl flex-col items-center justify-center"
+            : "max-w-xl",
+        ].join(" ")}
+      >
+        <motion.div
+          layout
+          transition={HEADER_TRANSITION}
+          className={[
+            loadingRoles ? "w-full text-center" : "w-full text-left",
+            "space-y-1",
+          ].join(" ")}
+        >
+          <TextShimmer
+            as="h1"
+            duration={2.8}
+            spread={1.7}
+            className="text-3xl font-bold text-slate-900 [--base-color:#1f2d44] [--base-gradient-color:#d5b995]"
+          >
+            Your Career Paths
+          </TextShimmer>
           <p className="text-slate-500">
             Ranked by how well your background fits each role. Pick one to deep-dive.
           </p>
-        </div>
+        </motion.div>
 
         {loadingRoles ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
-          </div>
+          <motion.div
+            key="loading-state"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={HEADER_TRANSITION}
+            className="mt-10 flex w-full justify-center"
+          >
+            <div className="relative w-full max-w-[240px] overflow-hidden">
+              <div className="h-[2px] w-full bg-[#d9dde0]" />
+              <motion.div
+                className="absolute left-0 top-0 h-[2px] w-[56%] bg-[#7f94a5]"
+                initial={{ x: "-75%" }}
+                animate={{ x: "220%" }}
+                transition={{ duration: 1.2, ease: "easeInOut", repeat: Number.POSITIVE_INFINITY }}
+              />
+            </div>
+          </motion.div>
         ) : (
-          <>
+          <motion.div
+            key="loaded-state"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.24, delay: 0.12 }}
+            className="mt-8 space-y-6"
+          >
             {/* Sort label + analysis status */}
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-slate-400 flex items-center gap-1">
                 ↑↓ Best match
               </span>
               {!allAnalysed && loadingIds.size > 0 && (
-                <span className="flex items-center gap-1.5 text-xs text-indigo-400">
-                  <Loader2 className="h-3 w-3 animate-spin" />
+                <span className="flex items-center gap-1.5 text-xs text-[#7f94a5]">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#4c6b84]" />
                   Scoring {loadingIds.size} role{loadingIds.size > 1 ? "s" : ""}…
                 </span>
               )}
@@ -169,17 +220,37 @@ export default function RolesPage() {
             </div>
 
             {/* Role cards */}
-            <div className="flex flex-col gap-3">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: {
+                  transition: {
+                    staggerChildren: 0.08,
+                    delayChildren: 0.08,
+                  },
+                },
+              }}
+              className="flex flex-col gap-3"
+            >
               {roles.map((role) => (
-                <RoleCard
+                <motion.div
                   key={role.id}
-                  role={role}
-                  selected={selectedId === role.id}
-                  loading={loadingIds.has(role.id)}
-                  onSelect={handleCardSelect}
-                />
+                  variants={{
+                    hidden: { opacity: 0, y: 28 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  transition={ROLE_LIST_TRANSITION}
+                >
+                  <RoleCard
+                    role={role}
+                    selected={selectedId === role.id}
+                    onSelect={handleCardSelect}
+                  />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             {/* Custom role input */}
             <div className="space-y-2 pt-2">
@@ -198,19 +269,19 @@ export default function RolesPage() {
             <button
               onClick={handleAnalyze}
               disabled={!activeRole}
-              className="w-full rounded-xl bg-indigo-600 py-3 text-white font-semibold hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="w-full rounded-xl bg-slate-900 py-3.5 text-base font-semibold text-white transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {activeRole && sessionStorage.getItem(CACHE_KEY(activeRole))
                 ? "View analysis →"
                 : "Analyze my fit →"}
             </button>
-          </>
+          </motion.div>
         )}
 
         {error && (
           <p className="text-sm text-center text-red-500">{error}</p>
         )}
-      </div>
+      </motion.div>
     </main>
   );
 }

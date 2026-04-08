@@ -5,8 +5,9 @@ FROM python:3.11-slim
 WORKDIR /app
 
 # Install dependencies first (cached layer)
-COPY backend/requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+COPY backend/requirements-base.txt ./
+COPY backend/requirements-dev.txt ./
+RUN pip install --no-cache-dir -r requirements-dev.txt
 
 # Copy backend source and knowledge base
 COPY backend/ ./backend/

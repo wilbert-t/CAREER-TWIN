@@ -1,13 +1,9 @@
-import os
 import json
-import httpx
 from app.models.profile import CVProfile
 from app.models.analysis import AnalyzeRoleFitResponse
 from app.prompts.analyze_role_fit import ANALYZE_ROLE_FIT_PROMPT
 from app.services.retrieval import retrieve_projects, retrieve_trajectories
-
-GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+from app.utils.groq_client import groq_chat_sync, GROQ_MODEL, has_keys
 
 
 def _weighted_overall(breakdown: dict) -> int:
@@ -27,8 +23,7 @@ def _score_label(overall: int) -> str:
 
 def analyze_role_fit(profile: CVProfile, role: str) -> AnalyzeRoleFitResponse:
     """Run full role fit analysis. Uses mock if no API key."""
-    api_key = os.getenv("GROQ_API_KEY", "")
-    if not api_key:
+    if not has_keys():
         return _mock_analysis(role)
 
     ctx_projects = retrieve_projects(role)
@@ -45,19 +40,13 @@ def analyze_role_fit(profile: CVProfile, role: str) -> AnalyzeRoleFitResponse:
         context=context_block,
     )
 
-    with httpx.Client(timeout=60) as client:
-        resp = client.post(
-            GROQ_API_URL,
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={
-                "model": GROQ_MODEL,
-                "messages": [{"role": "user", "content": prompt}],
-                "temperature": 0.3,
-            },
-        )
-        resp.raise_for_status()
+    resp_data = groq_chat_sync({
+        "model": GROQ_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.3,
+    })
 
-    content = resp.json()["choices"][0]["message"]["content"].strip()
+    content = resp_data["choices"][0]["message"]["content"].strip()
     if content.startswith("```"):
         content = content.split("\n", 1)[-1]
         content = content.rsplit("```", 1)[0].strip()

@@ -1,12 +1,8 @@
-import os
 import json
-import httpx
 from app.models.profile import CVProfile
 from app.models.analysis import ExpandProjectResponse
 from app.prompts.expand_project import EXPAND_PROJECT_PROMPT
-
-GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+from app.utils.groq_client import groq_chat_sync, GROQ_MODEL, has_keys
 
 
 def expand_project(
@@ -16,8 +12,7 @@ def expand_project(
     short_description: str,
 ) -> ExpandProjectResponse:
     """Expand a project idea into a detailed breakdown. Uses mock if no API key."""
-    api_key = os.getenv("GROQ_API_KEY", "")
-    if not api_key:
+    if not has_keys():
         return _mock_expansion(project_name, short_description)
 
     prompt = EXPAND_PROJECT_PROMPT.format(
@@ -27,19 +22,13 @@ def expand_project(
         raw_text=profile.raw_text[:2000],
     )
 
-    with httpx.Client(timeout=60) as client:
-        resp = client.post(
-            GROQ_API_URL,
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={
-                "model": GROQ_MODEL,
-                "messages": [{"role": "user", "content": prompt}],
-                "temperature": 0.4,
-            },
-        )
-        resp.raise_for_status()
+    resp_data = groq_chat_sync({
+        "model": GROQ_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.4,
+    })
 
-    content = resp.json()["choices"][0]["message"]["content"].strip()
+    content = resp_data["choices"][0]["message"]["content"].strip()
     if content.startswith("```"):
         content = content.split("\n", 1)[-1]
         content = content.rsplit("```", 1)[0].strip()

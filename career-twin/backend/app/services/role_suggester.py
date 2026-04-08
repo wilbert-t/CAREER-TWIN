@@ -1,19 +1,14 @@
-import os
 import json
-import httpx
 from app.models.profile import CVProfile
 from app.models.analysis import RoleSuggestion
 from app.prompts.suggest_roles import SUGGEST_ROLES_PROMPT
 from app.services.retrieval import retrieve_roles
-
-GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_MODEL = "llama-3.3-70b-versatile"
+from app.utils.groq_client import groq_chat_async, GROQ_MODEL, has_keys
 
 
 async def suggest_roles(profile: CVProfile) -> list[RoleSuggestion]:
     """Return 5 suggested roles for the given profile. Uses mock if no API key."""
-    api_key = os.getenv("GROQ_API_KEY", "")
-    if not api_key:
+    if not has_keys():
         return _mock_roles()
 
     context = retrieve_roles(profile.raw_text[:500])
@@ -24,19 +19,13 @@ async def suggest_roles(profile: CVProfile) -> list[RoleSuggestion]:
         context=context_block,
     )
 
-    async with httpx.AsyncClient(timeout=60) as client:
-        resp = await client.post(
-            GROQ_API_URL,
-            headers={"Authorization": f"Bearer {api_key}"},
-            json={
-                "model": GROQ_MODEL,
-                "messages": [{"role": "user", "content": prompt}],
-                "temperature": 0.3,
-            },
-        )
-        resp.raise_for_status()
+    resp_data = await groq_chat_async({
+        "model": GROQ_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.3,
+    })
 
-    content = resp.json()["choices"][0]["message"]["content"].strip()
+    content = resp_data["choices"][0]["message"]["content"].strip()
     if content.startswith("```"):
         content = content.split("\n", 1)[-1]
         content = content.rsplit("```", 1)[0].strip()

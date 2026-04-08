@@ -39,10 +39,29 @@ export interface RoleSuggestion {
   title: string;
   short_description: string;
   preview_match_score: number;
+  skills?: string[];
 }
 
 export interface SuggestRolesResponse {
   roles: RoleSuggestion[];
+}
+
+export interface PriorityImprovement {
+  area: string;
+  title: string;
+  detail: string;
+  action: string;
+}
+
+export interface ProjectDetail {
+  name: string;
+  short_description: string;
+  difficulty: number;   // 1-5
+  uniqueness: number;   // 1-5
+  duration: string;
+  description: string;
+  objectives: string;
+  tools_required: string[];
 }
 
 export interface AnalyzeRoleFitResponse {
@@ -54,7 +73,7 @@ export interface AnalyzeRoleFitResponse {
   matched_skills: string[];
   missing_skills: string[];
   readiness_summary: Record<string, unknown>;
-  priority_improvements: string[];
+  priority_improvements: PriorityImprovement[];
   learning_steps: string[];
   possible_projects: string[];
   resume_improvements: string[];

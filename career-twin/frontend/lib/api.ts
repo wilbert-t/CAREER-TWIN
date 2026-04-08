@@ -1,4 +1,4 @@
-import type { CVProfile, UploadResponse, ConfirmResponse, SuggestRolesResponse, AnalyzeRoleFitResponse } from "./types";
+import type { CVProfile, UploadResponse, ConfirmResponse, SuggestRolesResponse, AnalyzeRoleFitResponse, ProjectDetail } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000";
 
@@ -59,6 +59,34 @@ export async function analyzeRoleFit(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ profile_id: profileId, selected_role: selectedRole }),
+    });
+  } catch {
+    throw new Error("Cannot connect to server. Make sure the backend is running on port 8000.");
+  }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { detail?: string }).detail ?? `Request failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function expandProject(
+  profileId: string,
+  role: string,
+  projectName: string,
+  shortDescription: string
+): Promise<ProjectDetail> {
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE}/expand-project`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        profile_id: profileId,
+        role,
+        project_name: projectName,
+        short_description: shortDescription,
+      }),
     });
   } catch {
     throw new Error("Cannot connect to server. Make sure the backend is running on port 8000.");

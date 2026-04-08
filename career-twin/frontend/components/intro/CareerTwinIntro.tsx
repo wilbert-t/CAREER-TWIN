@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 
 /* ─── Tuneable constants ─────────────────────────────────────────────────── */
@@ -37,14 +37,17 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
   const [percent, setPercent] = useState(0);
   const [statusIdx, setStatusIdx] = useState(0);
 
+  const liftFiredRef = useRef(false);
+  const onCompleteRef = useRef(onComplete);
+
   const progress = useMotionValue(0);
   const barScale = useTransform(progress, [0, 100], [0, 1]);
 
-  // Reduced motion: skip immediately
+  // Reduced motion: skip immediately (mount-only)
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mq.matches) { setPhase("done"); onComplete(); }
-  }, [onComplete]);
+    if (mq.matches) { setPhase("done"); onCompleteRef.current(); }
+  }, []); // intentionally mount-only
 
   // Animate progress 0→100
   useEffect(() => {
@@ -79,13 +82,15 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
     return () => clearTimeout(id);
   }, [phase]);
 
-  // After content fades → lifting
+  // After content fades → lifting (guarded against re-firing in lifting phase)
   const handleContentExited = useCallback(() => {
-    setPhase("lifting");
+    setPhase((prev) => prev === "exiting" ? "lifting" : prev);
   }, []);
 
-  // After panel lifts → done
+  // After panel lifts → done (guarded against double-fire)
   const handlePanelLifted = useCallback(() => {
+    if (liftFiredRef.current) return;
+    liftFiredRef.current = true;
     setTimeout(() => { setPhase("done"); onComplete(); }, TIMING.exitDelayMs);
   }, [onComplete]);
 
@@ -102,12 +107,9 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
         backgroundColor: COLORS.introBg,
         boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
       }}
-      animate={isLifting ? { y: "-100%" } : { y: "0%" }}
-      transition={
-        isLifting
-          ? { duration: TIMING.liftMs / 1000, ease: [0.76, 0, 0.24, 1] }
-          : { duration: 0 }
-      }
+      initial={{ y: "0%" }}
+      animate={isLifting ? { y: "-100%" } : undefined}
+      transition={isLifting ? { duration: TIMING.liftMs / 1000, ease: [0.76, 0, 0.24, 1] } : undefined}
       onAnimationComplete={isLifting ? handlePanelLifted : undefined}
     >
       {/* Decorative arc */}
@@ -184,7 +186,6 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
           key={statusIdx}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
         >
           {STATUS_LINES[statusIdx]}

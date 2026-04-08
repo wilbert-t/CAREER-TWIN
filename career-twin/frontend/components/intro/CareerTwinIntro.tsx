@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import { TextShimmer } from "@/components/core/text-shimmer";
 
 /* ─── Tuneable constants ─────────────────────────────────────────────────── */
 const COLORS = {
@@ -130,10 +129,10 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
         transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
       >
         <div
-          className="absolute w-2 h-2 rounded-full"
+          className="absolute w-10 h-10 rounded-full"
           style={{
             backgroundColor: "#C4A882",
-            boxShadow: "0 0 6px rgba(196,168,130,0.9), 0 0 14px rgba(196,168,130,0.35)",
+            boxShadow: "0 0 20px rgba(196,168,130,1), 0 0 40px rgba(196,168,130,0.6), 0 0 80px rgba(196,168,130,0.25)",
             transform: "translate(-50%, calc(-45vmin - 50%))",
           }}
         />
@@ -151,25 +150,34 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
           style={{ color: COLORS.muteText }}
-          className="text-xs font-mono tracking-widest tabular-nums"
+          className="text-2xl font-mono tracking-widest tabular-nums"
         >
           {String(percent).padStart(3, "0")} %
         </motion.p>
 
-        <motion.div
+        <motion.h1
           initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.7, ease: "easeOut" }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            backgroundPosition: ["200% center", "0% center"],
+          }}
+          transition={{
+            opacity: { delay: 0.15, duration: 0.7, ease: "easeOut" },
+            y: { delay: 0.15, duration: 0.7, ease: "easeOut" },
+            backgroundPosition: { delay: 0.85, duration: 2.5, repeat: Infinity, ease: "linear" },
+          }}
+          className="text-7xl font-bold tracking-tight leading-none"
+          style={{
+            backgroundImage: "linear-gradient(90deg, #1C2B3A 20%, #8A7060 38%, #C4A882 45%, #EDD9B8 50%, #C4A882 55%, #8A7060 62%, #1C2B3A 80%)",
+            backgroundSize: "200% 100%",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
         >
-          <TextShimmer
-            as="h1"
-            duration={2.5}
-            spread={1.5}
-            className="text-7xl font-bold tracking-tight leading-none [--base-color:#1C2B3A] [--base-gradient-color:#C4A882]"
-          >
-            Career Twin
-          </TextShimmer>
-        </motion.div>
+          Career Twin
+        </motion.h1>
 
         <motion.p
           initial={{ opacity: 0 }}

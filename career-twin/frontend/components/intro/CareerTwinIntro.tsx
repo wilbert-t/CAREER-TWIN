@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { TextShimmer } from "@/components/core/text-shimmer";
 
 /* ─── Tuneable constants ─────────────────────────────────────────────────── */
 const COLORS = {
@@ -119,8 +120,24 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
         xmlns="http://www.w3.org/2000/svg"
       >
         <circle cx="72%" cy="50%" r="42%" fill="none" stroke={COLORS.arcStroke} strokeWidth="1" opacity="0.7" />
-        <circle cx="60%" cy="84%" r="3" fill={COLORS.arcStroke} opacity="0.8" />
       </svg>
+
+      {/* Orbiting dot — rotates around the decorative arc */}
+      <motion.div
+        className="absolute pointer-events-none"
+        style={{ left: "72%", top: "50%", width: 0, height: 0 }}
+        animate={{ rotate: 360 }}
+        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+      >
+        <div
+          className="absolute w-2 h-2 rounded-full"
+          style={{
+            backgroundColor: "#C4A882",
+            boxShadow: "0 0 6px rgba(196,168,130,0.9), 0 0 14px rgba(196,168,130,0.35)",
+            transform: "translate(-50%, calc(-45vmin - 50%))",
+          }}
+        />
+      </motion.div>
 
       {/* Content group — fades and lifts slightly on exit */}
       <motion.div
@@ -139,15 +156,20 @@ export function CareerTwinIntro({ onComplete }: CareerTwinIntroProps) {
           {String(percent).padStart(3, "0")} %
         </motion.p>
 
-        <motion.h1
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.7, ease: "easeOut" }}
-          style={{ color: COLORS.titleText }}
-          className="text-5xl font-bold tracking-tight leading-none"
         >
-          Career Twin
-        </motion.h1>
+          <TextShimmer
+            as="h1"
+            duration={2.5}
+            spread={1.5}
+            className="text-7xl font-bold tracking-tight leading-none [--base-color:#1C2B3A] [--base-gradient-color:#C4A882]"
+          >
+            Career Twin
+          </TextShimmer>
+        </motion.div>
 
         <motion.p
           initial={{ opacity: 0 }}

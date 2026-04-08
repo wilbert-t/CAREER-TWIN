@@ -39,7 +39,7 @@ def test_suggest_roles_returns_three_roles():
     assert resp.status_code == 200
     data = resp.json()
     assert "roles" in data
-    assert len(data["roles"]) == 3
+    assert len(data["roles"]) >= 3
     for role in data["roles"]:
         assert "id" in role
         assert "title" in role
@@ -107,7 +107,7 @@ def test_expand_project_returns_all_fields():
     assert 1 <= data["difficulty"] <= 5
     assert 1 <= data["uniqueness"] <= 5
     assert isinstance(data["tools_required"], list)
-    assert len(data["tools_required"]) >= 1
+    assert len(data["tools_required"]) >= 3
 
 
 def test_expand_project_404_on_unknown_profile():

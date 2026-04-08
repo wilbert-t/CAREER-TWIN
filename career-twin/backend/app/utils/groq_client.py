@@ -34,7 +34,7 @@ def groq_chat_sync(payload: dict, timeout: float = 60.0) -> dict:
                 headers={"Authorization": f"Bearer {key}"},
                 json=payload,
             )
-            if resp.status_code == 429:
+            if resp.status_code in (429, 403):
                 continue
             resp.raise_for_status()
             return resp.json()
@@ -52,7 +52,7 @@ async def groq_chat_async(payload: dict, timeout: float = 60.0) -> dict:
                 headers={"Authorization": f"Bearer {key}"},
                 json=payload,
             )
-            if resp.status_code == 429:
+            if resp.status_code in (429, 403):
                 continue
             resp.raise_for_status()
             return resp.json()

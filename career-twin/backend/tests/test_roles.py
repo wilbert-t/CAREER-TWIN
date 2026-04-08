@@ -86,3 +86,38 @@ def test_analyze_role_fit_404_on_unknown_profile():
         json={"profile_id": "does-not-exist", "selected_role": "ml_engineer"},
     )
     assert resp.status_code == 404
+
+
+def test_expand_project_returns_all_fields():
+    profile_id = save_profile(SAMPLE_PROFILE)
+    resp = client.post(
+        "/expand-project",
+        json={
+            "profile_id": profile_id,
+            "role": "ML Engineer",
+            "project_name": "Sentiment Analysis API",
+            "short_description": "Build a REST API that classifies text sentiment",
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    for field in ["name", "short_description", "difficulty", "uniqueness", "duration",
+                  "description", "objectives", "tools_required"]:
+        assert field in data, f"Missing field: {field}"
+    assert 1 <= data["difficulty"] <= 5
+    assert 1 <= data["uniqueness"] <= 5
+    assert isinstance(data["tools_required"], list)
+    assert len(data["tools_required"]) >= 1
+
+
+def test_expand_project_404_on_unknown_profile():
+    resp = client.post(
+        "/expand-project",
+        json={
+            "profile_id": "does-not-exist",
+            "role": "ML Engineer",
+            "project_name": "Sentiment API",
+            "short_description": "Classify text",
+        },
+    )
+    assert resp.status_code == 404

@@ -44,8 +44,16 @@ def expand_project(
         content = content.split("\n", 1)[-1]
         content = content.rsplit("```", 1)[0].strip()
 
-    data = json.loads(content)
-    return ExpandProjectResponse(**data)
+    try:
+        data = json.loads(content)
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            f"LLM returned non-JSON content. First 200 chars: {content[:200]}"
+        ) from exc
+    try:
+        return ExpandProjectResponse(**data)
+    except Exception as exc:
+        raise ValueError(f"LLM response did not match expected schema: {exc}") from exc
 
 
 def _mock_expansion(project_name: str, short_description: str) -> ExpandProjectResponse:
@@ -65,5 +73,5 @@ def _mock_expansion(project_name: str, short_description: str) -> ExpandProjectR
             "You will practise the full development lifecycle — from design to deployment — and produce a "
             "portfolio piece you can walk through in interviews."
         ),
-        tools_required=["Python", "FastAPI", "React", "PostgreSQL", "Docker", "Git"],
+        tools_required=["Python", "FastAPI", "PostgreSQL", "Docker", "Git", "pytest"],
     )

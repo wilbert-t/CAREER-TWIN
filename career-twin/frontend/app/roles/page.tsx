@@ -81,7 +81,9 @@ export default function RolesPage() {
                 sessionStorage.setItem("suggested_roles", JSON.stringify(updated));
                 return updated;
               });
-              sessionStorage.setItem(CACHE_KEY(role.title), JSON.stringify(result));
+              if (!cancelled) {
+                sessionStorage.setItem(CACHE_KEY(role.title), JSON.stringify(result));
+              }
             } catch {
               // silently skip failed role — card keeps score at 0
             } finally {

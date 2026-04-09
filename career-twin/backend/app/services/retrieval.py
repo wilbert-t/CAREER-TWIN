@@ -92,6 +92,8 @@ def retrieve_roles(profile_text: str) -> str:
     for filename, coll_name in [
         ("roles_tech.jsonl", "roles_tech"),
         ("roles_business.jsonl", "roles_business"),
+        ("roles_engineering.jsonl", "roles_engineering"),
+        ("roles_other.jsonl", "roles_other"),
     ]:
         path = KB_PATH / filename
         if not path.exists():

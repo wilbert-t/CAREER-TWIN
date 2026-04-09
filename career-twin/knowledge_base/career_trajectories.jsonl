@@ -1,3 +1,21 @@
-{"from_role": "student", "to_role": "junior_engineer", "pathway": "Learn Python, build projects, contribute to open-source", "duration_months": 6}
-{"from_role": "junior_engineer", "to_role": "senior_engineer", "pathway": "Master system design, mentor juniors, lead technical projects", "duration_months": 36}
-{"from_role": "engineer", "to_role": "product_manager", "pathway": "Develop leadership skills, take on PM internship, understand user needs", "duration_months": 12}
+{"from_role": "student", "to_role": "junior_software_engineer", "pathway": "Learn Python or JavaScript, build 2-3 portfolio projects, complete an internship, contribute to open-source", "duration_months": 6}
+{"from_role": "junior_engineer", "to_role": "senior_engineer", "pathway": "Master system design, mentor juniors, lead technical projects, and deepen domain expertise", "duration_months": 36}
+{"from_role": "engineer", "to_role": "product_manager", "pathway": "Develop user empathy, take on PM internship, learn roadmapping and stakeholder communication", "duration_months": 12}
+{"from_role": "student", "to_role": "data_analyst", "pathway": "Learn SQL and Python, complete a data analysis project, earn a Tableau or Google Data Analytics certificate", "duration_months": 4}
+{"from_role": "data_analyst", "to_role": "data_scientist", "pathway": "Study statistics and machine learning, build ML projects, complete a Kaggle competition", "duration_months": 18}
+{"from_role": "student", "to_role": "mechanical_engineer", "pathway": "Complete engineering degree, gain CAD proficiency in SolidWorks or AutoCAD, do a site or workshop internship", "duration_months": 6}
+{"from_role": "mechanical_engineer", "to_role": "project_manager", "pathway": "Lead smaller projects, get PMP or PRINCE2 certification, develop stakeholder management skills", "duration_months": 24}
+{"from_role": "student", "to_role": "civil_engineer", "pathway": "Graduate with civil engineering degree, get licensed (PE or equivalent), complete site-based internship", "duration_months": 6}
+{"from_role": "civil_engineer", "to_role": "construction_manager", "pathway": "Gain site supervision experience, learn cost estimation and scheduling, pursue CIOB or PMP", "duration_months": 36}
+{"from_role": "student", "to_role": "hvac_engineer", "pathway": "Learn HVAC design principles, get hands-on internship with M&E consultant, learn Revit MEP and AutoCAD", "duration_months": 6}
+{"from_role": "hvac_engineer", "to_role": "building_services_manager", "pathway": "Lead full MEP projects, develop client management skills, get chartered engineer status", "duration_months": 48}
+{"from_role": "student", "to_role": "financial_analyst", "pathway": "Study finance and Excel, complete an investment banking or corporate finance internship, earn CFA Level 1", "duration_months": 6}
+{"from_role": "financial_analyst", "to_role": "investment_manager", "pathway": "Develop portfolio management skills, pass CFA exams, build a track record of investment decisions", "duration_months": 48}
+{"from_role": "student", "to_role": "marketing_analyst", "pathway": "Learn Google Analytics and SQL, build a campaign analysis project, complete a digital marketing internship", "duration_months": 4}
+{"from_role": "marketing_analyst", "to_role": "marketing_manager", "pathway": "Lead campaigns end-to-end, manage a team, develop brand strategy skills", "duration_months": 36}
+{"from_role": "student", "to_role": "management_consultant", "pathway": "Develop case-solving skills, network with consulting firms, complete a consulting internship or join a consulting club", "duration_months": 6}
+{"from_role": "student", "to_role": "healthcare_admin", "pathway": "Study health administration or a related field, do a hospital internship, learn healthcare regulations and EHR systems", "duration_months": 6}
+{"from_role": "student", "to_role": "ux_designer", "pathway": "Build a UX portfolio with case studies, learn Figma, complete a UX bootcamp or internship", "duration_months": 4}
+{"from_role": "ux_designer", "to_role": "product_manager", "pathway": "Develop data literacy and business acumen, work closely with engineering, move into APM or associate PM programs", "duration_months": 24}
+{"from_role": "student", "to_role": "biomedical_engineer", "pathway": "Graduate in biomedical or related engineering, intern at medical device company, learn FDA regulatory basics", "duration_months": 6}
+{"from_role": "engineer", "to_role": "startup_founder", "pathway": "Identify a real problem from your domain, build an MVP, validate with users, apply to accelerators", "duration_months": 12}

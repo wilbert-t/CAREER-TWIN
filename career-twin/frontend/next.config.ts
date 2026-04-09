@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob:",
               "font-src 'self'",
-              "connect-src 'self' http://localhost:8000 https://career-twin-production.up.railway.app",
+              "connect-src 'self' http://localhost:8000 https://career-twin-production.up.railway.app https://career-twin.onrender.com",
             ].join("; "),
           },
         ],

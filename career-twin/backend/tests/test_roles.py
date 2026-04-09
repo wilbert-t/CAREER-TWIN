@@ -3,6 +3,8 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.utils.store import save_profile, clear_store
 from app.models.profile import CVProfile, Experience, Education
+from app.services.role_suggester import _enforce_score_spread
+from app.models.analysis import RoleSuggestion
 
 client = TestClient(app)
 
@@ -121,3 +123,69 @@ def test_expand_project_404_on_unknown_profile():
         },
     )
     assert resp.status_code == 404
+
+
+# --- _enforce_score_spread unit tests ---
+
+def _make_roles(scores: list[int]) -> list[RoleSuggestion]:
+    """Helper: build minimal RoleSuggestion list from a score list."""
+    return [
+        RoleSuggestion(
+            id=f"role_{i}",
+            title=f"Role {i}",
+            short_description="desc",
+            preview_match_score=s,
+            skills=[],
+        )
+        for i, s in enumerate(scores)
+    ]
+
+
+def test_enforce_spread_no_change_when_already_distinct():
+    roles = _make_roles([75, 65, 55, 45, 35])
+    result = _enforce_score_spread(roles)
+    scores = [r.preview_match_score for r in result]
+    assert scores == [75, 65, 55, 45, 35]
+
+
+def test_enforce_spread_fixes_tied_scores():
+    roles = _make_roles([56, 56, 56, 56, 56])
+    result = _enforce_score_spread(roles)
+    scores = [r.preview_match_score for r in result]
+    # All must be unique
+    assert len(set(scores)) == 5
+    # Adjacent pairs must differ by >= 5
+    for a, b in zip(scores, scores[1:]):
+        assert a - b >= 5, f"Adjacent scores too close: {a} and {b}"
+
+
+def test_enforce_spread_fixes_near_ties():
+    # Gap of 3 between first two — too close
+    roles = _make_roles([70, 67, 55, 45, 35])
+    result = _enforce_score_spread(roles)
+    scores = [r.preview_match_score for r in result]
+    assert scores[0] - scores[1] >= 5
+
+
+def test_enforce_spread_result_sorted_descending():
+    roles = _make_roles([56, 56, 61, 56, 56])
+    result = _enforce_score_spread(roles)
+    scores = [r.preview_match_score for r in result]
+    assert scores == sorted(scores, reverse=True)
+
+
+def test_enforce_spread_clamps_to_minimum_10():
+    # Force scores so low that spreading would push below 0
+    roles = _make_roles([20, 18, 16, 14, 12])
+    result = _enforce_score_spread(roles)
+    scores = [r.preview_match_score for r in result]
+    assert all(s >= 10 for s in scores)
+
+
+def test_suggest_roles_mock_returns_unique_scores():
+    """Integration: mock path must also return unique scores."""
+    profile_id = save_profile(SAMPLE_PROFILE)
+    resp = client.post("/suggest-roles", json={"profile_id": profile_id})
+    assert resp.status_code == 200
+    scores = [r["preview_match_score"] for r in resp.json()["roles"]]
+    assert len(set(scores)) == len(scores), f"Duplicate scores found: {scores}"

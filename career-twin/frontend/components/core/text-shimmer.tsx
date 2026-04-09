@@ -1,7 +1,7 @@
 'use client';
 
 import { CSSProperties, type ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Transition } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 type TextShimmerProps = {
@@ -25,15 +25,17 @@ function ShimmerWrapper({
   style: CSSProperties;
   duration: number;
 }) {
+  const transition: Transition = {
+    repeat: Infinity,
+    duration,
+    ease: 'linear',
+  };
+
   const animationProps = {
     className,
     initial: { backgroundPosition: '100% center' },
     animate: { backgroundPosition: '0% center' },
-    transition: {
-      repeat: Infinity,
-      duration,
-      ease: 'linear',
-    },
+    transition,
     style,
   };
 

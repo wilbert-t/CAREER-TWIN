@@ -8,11 +8,34 @@ interface MainContentProps {
   data: AnalyzeRoleFitResponse;
   profileId: string;
   selectedRole: string;
+  highlightedSectionId?: string | null;
+  highlightSequence?: number;
 }
 
-function Section({ id, title, children }: { id?: string; title: string; children: React.ReactNode }) {
+function Section({
+  id,
+  title,
+  children,
+  isHighlighted = false,
+  highlightKey = 0,
+}: {
+  id?: string;
+  title: string;
+  children: React.ReactNode;
+  isHighlighted?: boolean;
+  highlightKey?: number;
+}) {
   return (
-    <div id={id} className="mb-10 scroll-mt-16">
+    <div
+      key={id ? `${id}-${highlightKey}` : undefined}
+      id={id}
+      className={[
+        "mb-10 scroll-mt-24 rounded-[28px] px-3 py-3 transition-all duration-500 sm:px-4",
+        isHighlighted
+          ? "dashboard-section-highlight bg-[#f8f2e8] shadow-[0_0_0_1px_rgba(203,177,133,0.55),0_20px_40px_rgba(120,90,40,0.08)]"
+          : "bg-transparent shadow-none",
+      ].join(" ")}
+    >
       <h2 className="mb-3 text-sm font-bold uppercase tracking-[0.16em] text-[#5f574e] sm:text-[15px]">{title}</h2>
       {children}
     </div>
@@ -152,7 +175,13 @@ function normaliseProjects(raw: string[]): NormalizedProject[] {
   });
 }
 
-export function MainContent({ data, profileId, selectedRole }: MainContentProps) {
+export function MainContent({
+  data,
+  profileId,
+  selectedRole,
+  highlightedSectionId,
+  highlightSequence = 0,
+}: MainContentProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalProjectName, setModalProjectName] = useState("");
   const [modalDetail, setModalDetail] = useState<ProjectDetail | null>(null);
@@ -256,7 +285,12 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
       </div>
 
       {/* Priority Improvements */}
-      <Section id="priority-improvements" title="Priority Improvements">
+      <Section
+        id="priority-improvements"
+        title="Priority Improvements"
+        isHighlighted={highlightedSectionId === "priority-improvements"}
+        highlightKey={highlightedSectionId === "priority-improvements" ? highlightSequence : 0}
+      >
         <div className="space-y-3">
           {improvements.map((item, i) => (
             <ImprovementCard key={i} item={item} />
@@ -270,7 +304,12 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
       </Section>
 
       {/* Possible Projects */}
-      <Section id="possible-projects" title="Possible Projects">
+      <Section
+        id="possible-projects"
+        title="Possible Projects"
+        isHighlighted={highlightedSectionId === "possible-projects"}
+        highlightKey={highlightedSectionId === "possible-projects" ? highlightSequence : 0}
+      >
         <div className="space-y-3">
           {projects.map((project, i) => {
             return (
@@ -309,7 +348,12 @@ export function MainContent({ data, profileId, selectedRole }: MainContentProps)
       )}
 
       {/* Goal Pathway */}
-      <Section id="goal-pathway" title="Goal Pathway">
+      <Section
+        id="goal-pathway"
+        title="Goal Pathway"
+        isHighlighted={highlightedSectionId === "goal-pathway"}
+        highlightKey={highlightedSectionId === "goal-pathway" ? highlightSequence : 0}
+      >
         <div className="space-y-3">
           {(["short_term", "mid_term", "long_term"] as const).map((key) => (
             pathway[key] && (

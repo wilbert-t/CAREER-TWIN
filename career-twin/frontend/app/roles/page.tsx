@@ -65,8 +65,8 @@ export default function RolesPage() {
         const pending = new Set(allRoles.map((r) => r.id));
         setLoadingIds(pending);
 
-        void (async () => {
-          for (const role of allRoles) {
+        void Promise.all(
+          allRoles.map(async (role) => {
             try {
               const result: AnalyzeRoleFitResponse = await analyzeRoleFitWithRetry(profileId, role.title, 4);
               if (cancelled) return;
@@ -83,7 +83,7 @@ export default function RolesPage() {
               });
               sessionStorage.setItem(CACHE_KEY(role.title), JSON.stringify(result));
             } catch {
-              if (cancelled) return;
+              // silently skip failed role — card keeps score at 0
             } finally {
               if (cancelled) return;
               setLoadingIds((prev) => {
@@ -92,16 +92,15 @@ export default function RolesPage() {
                 return next;
               });
             }
-          }
-          // All roles scored — enforce minimum gap so cards never show identical scores
-          if (!cancelled) {
-            setRoles((prev) => {
-              const spread = enforceScoreSpread(prev);
-              sessionStorage.setItem("suggested_roles", JSON.stringify(spread));
-              return spread;
-            });
-          }
-        })();
+          })
+        ).then(() => {
+          if (cancelled) return;
+          setRoles((prev) => {
+            const spread = enforceScoreSpread(prev);
+            sessionStorage.setItem("suggested_roles", JSON.stringify(spread));
+            return spread;
+          });
+        });
       })
       .catch((err) => {
         if (!cancelled) {

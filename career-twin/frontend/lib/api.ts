@@ -5,10 +5,6 @@ function resolveApiBase(): string {
     return process.env.NEXT_PUBLIC_API_BASE_URL;
   }
 
-  if (typeof window !== "undefined") {
-    return `${window.location.protocol}//${window.location.hostname}:8000`;
-  }
-
   return "http://localhost:8000";
 }
 
@@ -21,7 +17,7 @@ export async function uploadCV(file: File): Promise<UploadResponse> {
   try {
     res = await fetch(`${API_BASE}/upload-cv`, { method: "POST", body: form });
   } catch {
-    throw new Error("Cannot connect to server. Make sure the backend is running on port 8000.");
+    throw new Error("Cannot connect to the server. The service may be temporarily unavailable — please try again in a moment.");
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -52,7 +48,7 @@ export async function suggestRoles(profileId: string): Promise<SuggestRolesRespo
       body: JSON.stringify({ profile_id: profileId }),
     });
   } catch {
-    throw new Error("Cannot connect to server. Make sure the backend is running on port 8000.");
+    throw new Error("Cannot connect to the server. The service may be temporarily unavailable — please try again in a moment.");
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -73,7 +69,7 @@ export async function analyzeRoleFit(
       body: JSON.stringify({ profile_id: profileId, selected_role: selectedRole }),
     });
   } catch {
-    throw new Error("Cannot connect to server. Make sure the backend is running on port 8000.");
+    throw new Error("Cannot connect to the server. The service may be temporarily unavailable — please try again in a moment.");
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -122,7 +118,7 @@ export async function expandProject(
       }),
     });
   } catch {
-    throw new Error("Cannot connect to server. Make sure the backend is running on port 8000.");
+    throw new Error("Cannot connect to the server. The service may be temporarily unavailable — please try again in a moment.");
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));

@@ -3,7 +3,7 @@ from app.models.profile import CVProfile
 from app.models.analysis import AnalyzeRoleFitResponse
 from app.prompts.analyze_role_fit import ANALYZE_ROLE_FIT_PROMPT
 from app.services.retrieval import retrieve_projects, retrieve_trajectories
-from app.utils.groq_client import groq_chat_sync, GROQ_MODEL, has_keys
+from app.utils.groq_client import groq_chat_async, GROQ_MODEL_QUALITY, has_keys
 
 
 def _weighted_overall(breakdown: dict) -> int:
@@ -21,7 +21,7 @@ def _score_label(overall: int) -> str:
     return "Early Stage"
 
 
-def analyze_role_fit(profile: CVProfile, role: str) -> AnalyzeRoleFitResponse:
+async def analyze_role_fit(profile: CVProfile, role: str) -> AnalyzeRoleFitResponse:
     """Run full role fit analysis. Uses mock if no API key."""
     if not has_keys():
         return _mock_analysis(role)
@@ -40,8 +40,8 @@ def analyze_role_fit(profile: CVProfile, role: str) -> AnalyzeRoleFitResponse:
         context=context_block,
     )
 
-    resp_data = groq_chat_sync({
-        "model": GROQ_MODEL,
+    resp_data = await groq_chat_async({
+        "model": GROQ_MODEL_QUALITY,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.3,
     })
@@ -57,7 +57,6 @@ def analyze_role_fit(profile: CVProfile, role: str) -> AnalyzeRoleFitResponse:
         raise ValueError(
             f"LLM returned non-JSON content. First 200 chars: {content[:200]}"
         ) from exc
-    # Calculate overall score from weighted breakdown (LLM does not set this)
     breakdown = data.get("score_breakdown", {})
     overall = _weighted_overall(breakdown)
     data["match_score"] = {"overall": overall, "label": _score_label(overall)}

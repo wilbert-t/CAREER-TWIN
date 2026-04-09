@@ -31,7 +31,7 @@ async def suggest_roles_endpoint(body: SuggestRolesRequest):
 
 
 @router.post("/analyze-role-fit", response_model=AnalyzeRoleFitResponse)
-def analyze_role_fit_endpoint(body: AnalyzeRoleFitRequest):
+async def analyze_role_fit_endpoint(body: AnalyzeRoleFitRequest):
     profile = get_profile(body.profile_id)
     if not profile:
         raise HTTPException(
@@ -39,7 +39,7 @@ def analyze_role_fit_endpoint(body: AnalyzeRoleFitRequest):
             detail="Profile not found. Please upload your CV again.",
         )
     try:
-        result = analyze_role_fit(profile, body.selected_role)
+        result = await analyze_role_fit(profile, body.selected_role)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Role analysis failed: {str(e)}")
     return result

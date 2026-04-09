@@ -24,6 +24,7 @@ class CVProfile(BaseModel):
     education: list[Education] = Field(default_factory=list)
     skills: list[str] = Field(default_factory=list)
     projects: list[str] = Field(default_factory=list)
+    awards: list[str] = Field(default_factory=list)
     certificates: list[str] = Field(default_factory=list)
     leadership: list[str] = Field(default_factory=list)
 

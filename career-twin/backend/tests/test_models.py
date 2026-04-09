@@ -9,6 +9,7 @@ def test_cv_profile_defaults():
     assert profile.skills == []
     assert profile.experience == []
     assert profile.education == []
+    assert profile.awards == []
 
 
 def test_experience_model():

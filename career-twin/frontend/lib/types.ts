@@ -20,6 +20,7 @@ export interface CVProfile {
   education: Education[];
   skills: string[];
   projects: string[];
+  awards: string[];
   certificates: string[];
   leadership: string[];
 }

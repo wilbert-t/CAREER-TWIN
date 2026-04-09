@@ -43,6 +43,7 @@ def _dict_to_profile(data: dict, raw_text: str) -> CVProfile:
         ],
         skills=data.get("skills", []),
         projects=data.get("projects", []),
+        awards=data.get("awards", []),
         certificates=data.get("certificates", []),
         leadership=data.get("leadership", []),
     )
@@ -56,6 +57,9 @@ def _mock_structure(raw_text: str) -> CVProfile:
         summary="A motivated developer with experience in web technologies.",
         raw_text=raw_text,
         skills=["Python", "JavaScript", "SQL"],
+        projects=["Customer Churn Dashboard: Built a reporting dashboard with Python and SQL to surface churn patterns."],
+        awards=["Dean's List, 2023"],
+        certificates=["Google Data Analytics Professional Certificate"],
         experience=[
             Experience(
                 title="Intern", company="Tech Co", duration="2023–2024",

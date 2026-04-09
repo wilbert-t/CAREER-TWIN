@@ -25,6 +25,7 @@ VALID_PROFILE = {
     ],
     "skills": ["Python", "SQL"],
     "projects": [],
+    "awards": [],
     "certificates": [],
     "leadership": [],
 }

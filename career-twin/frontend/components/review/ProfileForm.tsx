@@ -178,7 +178,7 @@ export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps)
             <SectionHeader label="Projects" />
             <div className="px-6 pt-4">
               <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
-                Shown for reference only — edits here don't affect your career analysis.
+                Shown for reference only — edits here don&apos;t affect your career analysis.
               </p>
             </div>
             <div className="p-6 pt-0">
@@ -196,7 +196,7 @@ export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps)
             <SectionHeader label="Awards & Certifications" />
             <div className="px-6 pt-4">
               <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
-                Shown for reference only — edits here don't affect your career analysis.
+                Shown for reference only — edits here don&apos;t affect your career analysis.
               </p>
             </div>
             <div className="space-y-6 px-6 pb-6">

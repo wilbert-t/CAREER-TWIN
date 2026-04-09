@@ -147,7 +147,7 @@ export default function ReviewPage() {
 
         {truncatedSections.length > 0 && (
           <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            <strong>Some sections couldn't be parsed:</strong>{" "}
+            <strong>Some sections couldn&apos;t be parsed:</strong>{" "}
             {truncatedSections.join(", ")} — these appear empty below. You can add them manually before confirming.
           </div>
         )}

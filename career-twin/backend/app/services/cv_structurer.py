@@ -27,6 +27,23 @@ async def structure_cv(raw_text: str) -> CVProfile:
     return _dict_to_profile(data, raw_text)
 
 
+def _coerce_str(val: object) -> str:
+    """Coerce a value to string — handles LLM returning a list instead of a string."""
+    if isinstance(val, list):
+        return " ".join(str(item) for item in val)
+    return str(val) if val is not None else ""
+
+
+def _sanitise_experience(e: dict) -> dict:
+    """Coerce LLM quirks: any string field may come back as a list."""
+    return {
+        "title": _coerce_str(e.get("title", "")),
+        "company": _coerce_str(e.get("company", "")),
+        "duration": _coerce_str(e.get("duration", "")),
+        "description": _coerce_str(e.get("description", "")),
+    }
+
+
 def _dict_to_profile(data: dict, raw_text: str) -> CVProfile:
     return CVProfile(
         name=data.get("name", ""),
@@ -34,7 +51,7 @@ def _dict_to_profile(data: dict, raw_text: str) -> CVProfile:
         summary=data.get("summary", ""),
         raw_text=raw_text,
         experience=[
-            Experience(**e) for e in data.get("experience", [])
+            Experience(**_sanitise_experience(e)) for e in data.get("experience", [])
             if isinstance(e, dict)
         ],
         education=[

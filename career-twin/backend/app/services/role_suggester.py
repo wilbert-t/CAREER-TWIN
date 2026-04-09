@@ -3,7 +3,7 @@ from app.models.profile import CVProfile
 from app.models.analysis import RoleSuggestion
 from app.prompts.suggest_roles import SUGGEST_ROLES_PROMPT
 from app.services.retrieval import retrieve_roles
-from app.utils.groq_client import groq_chat_async, GROQ_MODEL, has_keys
+from app.utils.groq_client import groq_chat_async, GROQ_MODEL_FAST, has_keys
 
 
 def _enforce_score_spread(roles: list[RoleSuggestion], min_gap: int = 5) -> list[RoleSuggestion]:
@@ -51,7 +51,7 @@ async def suggest_roles(profile: CVProfile) -> list[RoleSuggestion]:
     )
 
     resp_data = await groq_chat_async({
-        "model": GROQ_MODEL,
+        "model": GROQ_MODEL_FAST,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.3,
     })

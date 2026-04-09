@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LeftSidebar } from "@/components/dashboard/LeftSidebar";
 import { MainContent } from "@/components/dashboard/MainContent";
@@ -26,6 +26,9 @@ export default function DashboardPage() {
   const [comparePickerOpen, setComparePickerOpen] = useState(false);
   const [switchError, setSwitchError] = useState<string | null>(null);
   const [rightPanelOpen, setRightPanelOpen] = useState(true);
+  const [highlightedSectionId, setHighlightedSectionId] = useState<string | null>(null);
+  const [highlightSequence, setHighlightSequence] = useState(0);
+  const highlightTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -161,6 +164,19 @@ export default function DashboardPage() {
     }
   }
 
+  function handleRecommendedAction(anchor: string) {
+    if (highlightTimeoutRef.current) {
+      window.clearTimeout(highlightTimeoutRef.current);
+    }
+
+    setHighlightedSectionId(anchor);
+    setHighlightSequence((current) => current + 1);
+    highlightTimeoutRef.current = window.setTimeout(() => {
+      setHighlightedSectionId((current) => (current === anchor ? null : current));
+      highlightTimeoutRef.current = null;
+    }, 1800);
+  }
+
   // Toggle compare: if already comparing, hide; otherwise open picker
   function handleCompareToggle() {
     if (isComparing) {
@@ -177,9 +193,21 @@ export default function DashboardPage() {
   async function handleCompareSelect(role: RoleSuggestion) {
     if (!profileId) return;
     setComparePickerOpen(false);
+
+    // Use pre-computed cache so compare score matches what the role card shows
+    const cached = sessionStorage.getItem(CACHE_KEY(role.title));
+    if (cached) {
+      setCompareAnalysis(JSON.parse(cached) as AnalyzeRoleFitResponse);
+      setCompareRole(role.title);
+      setIsComparing(true);
+      setRightPanelOpen(false);
+      return;
+    }
+
     setIsCompareLoading(true);
     try {
       const result = await analyzeRoleFit(profileId, role.title);
+      sessionStorage.setItem(CACHE_KEY(role.title), JSON.stringify(result));
       setCompareAnalysis(result);
       setCompareRole(role.title);
       setIsComparing(true);
@@ -270,7 +298,13 @@ export default function DashboardPage() {
                     <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">Current</p>
                     <p className="truncate text-sm font-semibold text-[#2f2a24]">{selectedRole}</p>
                   </div>
-                  <MainContent data={analysis} profileId={profileId} selectedRole={selectedRole} />
+                  <MainContent
+                    data={analysis}
+                    profileId={profileId}
+                    selectedRole={selectedRole}
+                    highlightedSectionId={highlightedSectionId}
+                    highlightSequence={highlightSequence}
+                  />
                 </div>
                 {/* Right: compared role */}
                 <div className="xl:overflow-y-auto">
@@ -278,11 +312,21 @@ export default function DashboardPage() {
                     <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#708697]">Comparing</p>
                     <p className="truncate text-sm font-semibold text-[#2f4b61]">{compareRole}</p>
                   </div>
-                  <MainContent data={compareAnalysis} profileId={profileId} selectedRole={compareRole} />
+                  <MainContent
+                    data={compareAnalysis}
+                    profileId={profileId}
+                    selectedRole={compareRole}
+                  />
                 </div>
               </div>
             ) : (
-              <MainContent data={analysis} profileId={profileId} selectedRole={selectedRole} />
+              <MainContent
+                data={analysis}
+                profileId={profileId}
+                selectedRole={selectedRole}
+                highlightedSectionId={highlightedSectionId}
+                highlightSequence={highlightSequence}
+              />
             )}
           </div>
         )}
@@ -294,6 +338,7 @@ export default function DashboardPage() {
           <RightPanel
             evidenceItems={analysis.evidence_items}
             resumeImprovements={analysis.resume_improvements}
+            onActionSelect={handleRecommendedAction}
           />
         </div>
       )}

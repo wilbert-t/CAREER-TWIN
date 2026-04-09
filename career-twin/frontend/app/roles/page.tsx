@@ -139,6 +139,22 @@ export default function RolesPage() {
       const result = await analyzeRoleFit(profileId, activeRole);
       sessionStorage.setItem("selected_role", activeRole);
       sessionStorage.setItem("analysis_result", JSON.stringify(result));
+      sessionStorage.setItem(CACHE_KEY(activeRole), JSON.stringify(result));
+
+      // Add the custom role as a card in the sidebar (6th card)
+      const actualScore = (result.match_score as { overall?: number }).overall ?? 0;
+      const existing: { id: string; title: string }[] = JSON.parse(sessionStorage.getItem("suggested_roles") ?? "[]");
+      if (!existing.some((r) => r.title === activeRole)) {
+        const customEntry = {
+          id: activeRole.toLowerCase().replace(/\W+/g, "_"),
+          title: activeRole,
+          short_description: (result.selected_role as { description?: string })?.description ?? activeRole,
+          preview_match_score: actualScore,
+          skills: (result.matched_skills ?? []).slice(0, 3),
+        };
+        sessionStorage.setItem("suggested_roles", JSON.stringify([...existing, customEntry]));
+      }
+
       router.push("/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Analysis failed. Please try again.");
@@ -159,6 +175,11 @@ export default function RolesPage() {
   }
 
   const allAnalysed = loadingIds.size === 0 && roles.length > 0;
+  const sortedRoles = [...roles].sort((a, b) => b.preview_match_score - a.preview_match_score);
+
+  function handleBestMatchSort() {
+    setRoles((prev) => [...prev].sort((a, b) => b.preview_match_score - a.preview_match_score));
+  }
 
   return (
     <main className="min-h-screen bg-[var(--background)] px-4 py-12">
@@ -222,9 +243,13 @@ export default function RolesPage() {
           >
             {/* Sort label + analysis status */}
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-slate-400 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={handleBestMatchSort}
+                className="flex items-center gap-1 text-lg font-medium text-slate-400 transition-colors hover:text-slate-600"
+              >
                 ↑↓ Best match
-              </span>
+              </button>
               {!allAnalysed && loadingIds.size > 0 && (
                 <span className="flex items-center gap-1.5 text-xs text-[#7f94a5]">
                   <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#4c6b84]" />
@@ -232,12 +257,13 @@ export default function RolesPage() {
                 </span>
               )}
               {allAnalysed && (
-                <span className="text-xs text-emerald-500 font-medium">✓ All scores ready</span>
+                <span className="text-lg font-medium text-emerald-500">✓ All scores ready</span>
               )}
             </div>
 
             {/* Role cards */}
             <motion.div
+              layout
               initial="hidden"
               animate="visible"
               variants={{
@@ -251,14 +277,18 @@ export default function RolesPage() {
               }}
               className="flex flex-col gap-3"
             >
-              {roles.map((role) => (
+              {sortedRoles.map((role) => (
                 <motion.div
+                  layout
                   key={role.id}
                   variants={{
                     hidden: { opacity: 0, y: 28 },
                     visible: { opacity: 1, y: 0 },
                   }}
-                  transition={ROLE_LIST_TRANSITION}
+                  transition={{
+                    ...ROLE_LIST_TRANSITION,
+                    layout: { duration: 0.38, ease: [0.22, 1, 0.36, 1] },
+                  }}
                 >
                   <RoleCard
                     role={role}

@@ -16,6 +16,8 @@ export function LeftSidebar({
   onRoleSwitch,
   isSwitching,
 }: LeftSidebarProps) {
+  const sortedRoles = [...roles].sort((a, b) => b.preview_match_score - a.preview_match_score);
+
   return (
     <aside className="flex flex-col gap-4 p-4 sm:gap-5 sm:p-5">
       <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface)] p-4">
@@ -28,7 +30,7 @@ export function LeftSidebar({
           Career Paths
         </p>
         <ul className="grid gap-2.5 sm:gap-3">
-          {roles.map((role) => {
+          {sortedRoles.map((role) => {
             const isActive = role.title === selectedRole || role.id === selectedRole;
             return (
               <li key={role.id}>
@@ -85,7 +87,7 @@ export function LeftSidebar({
               </li>
             );
           })}
-          {roles.length === 0 && (
+          {sortedRoles.length === 0 && (
             <li>
               <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface)] px-3.5 py-3">
                 <p className="truncate text-sm font-semibold text-[#2f4b61]">{selectedRole}</p>

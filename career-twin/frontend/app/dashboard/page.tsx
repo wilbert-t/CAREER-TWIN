@@ -92,15 +92,15 @@ export default function DashboardPage() {
             }
 
             sessionStorage.setItem(CACHE_KEY(currentRole.title), JSON.stringify(result));
-            setRoles((prev) => {
-              const updated = prev.map((item) =>
-                item.title === currentRole.title
-                  ? { ...item, preview_match_score: nextScore }
-                  : item
-              );
-              sessionStorage.setItem("suggested_roles", JSON.stringify(updated));
-              return updated;
-            });
+              setRoles((prev) => {
+                const updated = prev.map((item) =>
+                  item.title === currentRole.title
+                    ? { ...item, preview_match_score: nextScore }
+                    : item
+                );
+                sessionStorage.setItem("suggested_roles", JSON.stringify(updated));
+                return updated;
+              });
           } catch {
             if (cancelled) return;
           }

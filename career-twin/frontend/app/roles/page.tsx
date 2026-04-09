@@ -18,6 +18,20 @@ const ANALYSIS_MESSAGES = [
 
 const CACHE_KEY = (title: string) => `analysis_cache_${title}`;
 const HEADER_TRANSITION = { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const };
+
+function enforceScoreSpread(roles: RoleSuggestion[], minGap = 5): RoleSuggestion[] {
+  if (!roles.length) return roles;
+  const sorted = [...roles].sort((a, b) => b.preview_match_score - a.preview_match_score);
+  const scores = sorted.map(r => r.preview_match_score);
+  for (let i = 0; i < scores.length - 1; i++) {
+    if (scores[i] - scores[i + 1] < minGap) {
+      scores[i + 1] = scores[i] - minGap;
+    }
+  }
+  const clamped = scores.map(s => Math.max(10, Math.min(100, s)));
+  return sorted.map((r, i) => ({ ...r, preview_match_score: clamped[i] }))
+    .sort((a, b) => b.preview_match_score - a.preview_match_score);
+}
 const ROLE_LIST_TRANSITION = { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const };
 
 export default function RolesPage() {
@@ -78,6 +92,14 @@ export default function RolesPage() {
                 return next;
               });
             }
+          }
+          // All roles scored — enforce minimum gap so cards never show identical scores
+          if (!cancelled) {
+            setRoles((prev) => {
+              const spread = enforceScoreSpread(prev);
+              sessionStorage.setItem("suggested_roles", JSON.stringify(spread));
+              return spread;
+            });
           }
         })();
       })

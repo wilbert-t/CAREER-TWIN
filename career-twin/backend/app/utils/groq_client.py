@@ -2,9 +2,15 @@ import os
 import httpx
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
-# GROQ_MODEL = "llama-3.3-70b-versatile"
-# GROQ_MODEL = "llama-3.1-8b-instant"
-GROQ_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
+
+# Fast model — used for role suggestion (card titles + preview scores only)
+GROQ_MODEL_FAST = "llama-3.1-8b-instant"
+
+# Quality model — used for deep role analysis (evidence, improvements, roadmap)
+GROQ_MODEL_QUALITY = "llama-3.3-70b-versatile"
+
+# Keep GROQ_MODEL as alias so any other callers don't break
+GROQ_MODEL = GROQ_MODEL_QUALITY
 
 
 def _load_keys() -> list[str]:

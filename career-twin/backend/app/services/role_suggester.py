@@ -6,6 +6,37 @@ from app.services.retrieval import retrieve_roles
 from app.utils.groq_client import groq_chat_async, GROQ_MODEL, has_keys
 
 
+def _enforce_score_spread(roles: list[RoleSuggestion], min_gap: int = 5) -> list[RoleSuggestion]:
+    """
+    Ensure adjacent roles differ by at least min_gap points.
+    Sorts descending, nudges scores down where gaps are too small,
+    clamps to [10, 100], then re-sorts.
+    """
+    if not roles:
+        return roles
+
+    # Sort descending by score so we walk top → bottom
+    sorted_roles = sorted(roles, key=lambda r: r.preview_match_score, reverse=True)
+    scores = [r.preview_match_score for r in sorted_roles]
+
+    # Walk pairs; push lower score down if gap is too small
+    for i in range(len(scores) - 1):
+        gap = scores[i] - scores[i + 1]
+        if gap < min_gap:
+            scores[i + 1] = scores[i] - min_gap
+
+    # Clamp all scores to [10, 100]
+    scores = [max(10, min(100, s)) for s in scores]
+
+    # Write scores back into role objects (they are Pydantic models — rebuild)
+    result = []
+    for role, score in zip(sorted_roles, scores):
+        result.append(role.model_copy(update={"preview_match_score": score}))
+
+    # Re-sort descending after clamping (clamping can reorder bottom roles)
+    return sorted(result, key=lambda r: r.preview_match_score, reverse=True)
+
+
 async def suggest_roles(profile: CVProfile) -> list[RoleSuggestion]:
     """Return 5 suggested roles for the given profile. Uses mock if no API key."""
     if not has_keys():
@@ -37,13 +68,14 @@ async def suggest_roles(profile: CVProfile) -> list[RoleSuggestion]:
             f"LLM returned non-JSON content. First 200 chars: {content[:200]}"
         ) from exc
     try:
-        return [RoleSuggestion(**r) for r in data]
+        roles = [RoleSuggestion(**r) for r in data]
+        return _enforce_score_spread(roles)
     except Exception as exc:
         raise ValueError(f"LLM response did not match expected schema: {exc}") from exc
 
 
 def _mock_roles() -> list[RoleSuggestion]:
-    return [
+    return _enforce_score_spread([
         RoleSuggestion(
             id="ml_engineer",
             title="ML Engineer",
@@ -79,4 +111,4 @@ def _mock_roles() -> list[RoleSuggestion]:
             preview_match_score=45,
             skills=["Analytics", "A/B Testing", "Dashboards"],
         ),
-    ]
+    ])

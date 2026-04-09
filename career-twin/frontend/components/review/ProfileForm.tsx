@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import type { CVProfile, Experience, Education } from "@/lib/types";
 
 const NAV_SECTIONS = [
-  { id: "upload",     label: "Upload and Parse CV" },
+  { id: "upload", label: "Upload and Parse CV", kind: "action" },
   { id: "personal",  label: "Personal Information" },
   { id: "skills",    label: "Skills" },
   { id: "education", label: "Education Background" },
   { id: "experience",label: "Internships / Project Experience" },
+  { id: "projects", label: "Projects" },
+  { id: "awards", label: "Awards & Certifications" },
 ] as const;
 
 const iCls =
@@ -23,12 +26,14 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps) {
+  const router = useRouter();
   const [profile, setProfile] = useState<CVProfile>(initial);
   const [activeSection, setActiveSection] = useState<string>("personal");
   const [newSkill, setNewSkill] = useState("");
+  const [isDirty, setIsDirty] = useState(false);
 
   useEffect(() => {
-    const targets = NAV_SECTIONS.filter(s => s.id !== "upload");
+    const targets = NAV_SECTIONS.filter((s) => s.id !== "upload");
     const observers: IntersectionObserver[] = [];
     targets.forEach(({ id }) => {
       const el = document.getElementById(id);
@@ -45,10 +50,29 @@ export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps)
 
   function set<K extends keyof CVProfile>(key: K, val: CVProfile[K]) {
     setProfile(p => ({ ...p, [key]: val }));
+    setIsDirty(true);
   }
 
   function scrollTo(id: string) {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const target = document.getElementById(id);
+    if (!target) return;
+
+    setActiveSection(id);
+
+    const topOffset = 88;
+    const targetTop = window.scrollY + target.getBoundingClientRect().top - topOffset;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const nextScrollTop = Math.max(0, Math.min(targetTop, maxScroll));
+
+    window.scrollTo({
+      top: nextScrollTop,
+      behavior: "smooth",
+    });
+  }
+
+  function handleUploadClick() {
+    if (isDirty && !window.confirm("You have unsaved edits. Leave and discard them?")) return;
+    router.push("/");
   }
 
   function addSkill() {
@@ -65,7 +89,7 @@ export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps)
         <div className="flex-1 min-w-0 space-y-5">
 
           {/* Personal Information */}
-          <section id="personal" className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden scroll-mt-8">
+          <section id="personal" className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden scroll-mt-24">
             <SectionHeader label="Personal Information" />
             <div className="p-6 space-y-5">
               <div className="grid grid-cols-2 gap-x-10 gap-y-5">
@@ -90,7 +114,7 @@ export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps)
           </section>
 
           {/* Skills */}
-          <section id="skills" className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden scroll-mt-8">
+          <section id="skills" className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden scroll-mt-24">
             <SectionHeader label="Skills" />
             <div className="p-6">
               <div className="flex flex-wrap gap-2 mb-4 min-h-8">
@@ -121,7 +145,7 @@ export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps)
           </section>
 
           {/* Education */}
-          <section id="education" className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden scroll-mt-8">
+          <section id="education" className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden scroll-mt-24">
             <SectionHeader label="Education Background" />
             <div className="divide-y divide-slate-50">
               {profile.education.map((edu, i) => (
@@ -136,7 +160,7 @@ export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps)
           </section>
 
           {/* Experience */}
-          <section id="experience" className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden scroll-mt-8">
+          <section id="experience" className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden scroll-mt-24">
             <SectionHeader label="Internships / Project Experience" />
             <div className="divide-y divide-slate-50">
               {profile.experience.map((exp, i) => (
@@ -147,6 +171,45 @@ export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps)
                     set("experience", list);
                   }} />
               ))}
+            </div>
+          </section>
+
+          <section id="projects" className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden scroll-mt-24">
+            <SectionHeader label="Projects" />
+            <div className="p-6">
+              <EditableList
+                items={profile.projects}
+                emptyLabel="No projects extracted yet."
+                addLabel="Add project"
+                placeholder="Project name: describe the outcome, tools, and impact…"
+                onChange={(projects) => set("projects", projects)}
+              />
+            </div>
+          </section>
+
+          <section id="awards" className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden scroll-mt-24">
+            <SectionHeader label="Awards & Certifications" />
+            <div className="space-y-6 p-6">
+              <div className="space-y-2">
+                <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">Awards</p>
+                <EditableList
+                  items={profile.awards}
+                  emptyLabel="No awards extracted yet."
+                  addLabel="Add award"
+                  placeholder="Dean’s List, hackathon placement, scholarship, honor, or competition result…"
+                  onChange={(awards) => set("awards", awards)}
+                />
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">Certifications</p>
+                <EditableList
+                  items={profile.certificates}
+                  emptyLabel="No certifications extracted yet."
+                  addLabel="Add certification"
+                  placeholder="AWS Certified Cloud Practitioner, Google Data Analytics…"
+                  onChange={(certificates) => set("certificates", certificates)}
+                />
+              </div>
             </div>
           </section>
 
@@ -166,8 +229,8 @@ export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps)
         </div>
 
         {/* ── Sticky sidebar ── */}
-        <aside className="hidden lg:block w-56 shrink-0 sticky top-8">
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-100 shadow-sm p-3">
+        <aside className="hidden w-56 shrink-0 lg:block">
+          <div className="lg:fixed lg:top-24 lg:z-30 lg:w-56 lg:right-[max(2rem,calc((100vw-80rem)/2+2rem))] max-h-[calc(100vh-6rem)] overflow-y-auto rounded-2xl border border-white/70 bg-[#fcfaf6]/92 p-3 shadow-[0_16px_40px_rgba(72,56,36,0.10)] backdrop-blur-md">
             <ul className="space-y-0.5">
               {NAV_SECTIONS.map(({ id, label }) => {
                 const isActive = activeSection === id;
@@ -175,14 +238,23 @@ export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps)
                 return (
                   <li key={id}>
                     <button type="button"
-                      onClick={() => !isUpload && scrollTo(id)}
+                      onClick={() => (isUpload ? handleUploadClick() : scrollTo(id))}
                       className={[
                         "w-full text-left flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm transition-all",
-                        isActive
+                        isUpload
+                          ? "border border-[#d6c3ae] bg-[#f7efe4] text-[#8A6048] shadow-sm hover:bg-[#f4eadb]"
+                          : isActive
                           ? "bg-white shadow-sm text-[#8A6048] font-semibold border border-[#8A6048]/20"
                           : "text-slate-500 hover:text-slate-800 hover:bg-slate-50",
                       ].join(" ")}>
-                      <span className={`text-xs shrink-0 ${isActive ? "text-[#8A6048]" : "text-slate-300"}`}>✓</span>
+                      <span
+                        className={[
+                          "text-xs shrink-0",
+                          isUpload || isActive ? "text-[#8A6048]" : "text-slate-300",
+                        ].join(" ")}
+                      >
+                        {isUpload ? "↺" : "✓"}
+                      </span>
                       <span className="leading-snug">{label}</span>
                     </button>
                   </li>
@@ -266,6 +338,75 @@ function ExperienceCard({ exp, onChange }: { exp: Experience; onChange: (e: Expe
           rows={5} className={`${iCls} resize-y leading-relaxed`}
           placeholder="Describe your responsibilities and achievements…" />
       </Field>
+    </div>
+  );
+}
+
+function EditableList({
+  items,
+  onChange,
+  placeholder,
+  addLabel,
+  emptyLabel,
+}: {
+  items: string[];
+  onChange: (items: string[]) => void;
+  placeholder: string;
+  addLabel: string;
+  emptyLabel: string;
+}) {
+  const safeItems = Array.isArray(items) ? items : [];
+
+  function updateItem(index: number, value: string) {
+    const next = [...safeItems];
+    next[index] = value;
+    onChange(next);
+  }
+
+  function removeItem(index: number) {
+    onChange(safeItems.filter((_, itemIndex) => itemIndex !== index));
+  }
+
+  function addItem() {
+    onChange([...safeItems, ""]);
+  }
+
+  return (
+    <div className="space-y-3">
+      {safeItems.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-3 text-sm text-slate-400">
+          {emptyLabel}
+        </div>
+      ) : (
+        safeItems.map((item, index) => (
+          <div key={index} className="rounded-xl border border-slate-100 bg-slate-50/50 p-3">
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">Item {index + 1}</p>
+              <button
+                type="button"
+                onClick={() => removeItem(index)}
+                className="text-xs font-medium text-slate-400 transition-colors hover:text-slate-700"
+              >
+                Remove
+              </button>
+            </div>
+            <textarea
+              value={item}
+              onChange={(event) => updateItem(index, event.target.value)}
+              rows={3}
+              className={`${iCls} resize-y leading-relaxed`}
+              placeholder={placeholder}
+            />
+          </div>
+        ))
+      )}
+      <button
+        type="button"
+        onClick={addItem}
+        className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50"
+      >
+        {addLabel}
+      </button>
     </div>
   );
 }

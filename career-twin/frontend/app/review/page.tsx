@@ -7,6 +7,16 @@ import { ProfileForm } from "@/components/review/ProfileForm";
 import { confirmProfile } from "@/lib/api";
 import type { CVProfile, UploadResponse } from "@/lib/types";
 
+const TRUNCATED_FIELD_LABELS: Record<string, string> = {
+  experience: "Experience",
+  education: "Education",
+  skills: "Skills",
+  projects: "Projects",
+  awards: "Awards",
+  certificates: "Certifications",
+  leadership: "Leadership",
+};
+
 function normaliseProfile(profile: CVProfile): { profile: CVProfile; truncated: string[] } {
   const truncated: string[] = [];
   const fields = ["experience", "education", "skills", "projects", "awards", "certificates", "leadership"] as const;
@@ -148,7 +158,7 @@ export default function ReviewPage() {
         {truncatedSections.length > 0 && (
           <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
             <strong>Some sections couldn&apos;t be parsed:</strong>{" "}
-            {truncatedSections.join(", ")} — these appear empty below. You can add them manually before confirming.
+            {truncatedSections.map(f => TRUNCATED_FIELD_LABELS[f] ?? f).join(", ")} — these appear empty below. You can add them manually before confirming.
           </div>
         )}
 

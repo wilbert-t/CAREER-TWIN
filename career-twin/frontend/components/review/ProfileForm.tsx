@@ -82,7 +82,7 @@ export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps)
   }
 
   return (
-    <form onSubmit={e => { e.preventDefault(); onConfirm(profile); }}>
+    <form onSubmit={e => { e.preventDefault(); setIsDirty(false); onConfirm(profile); }}>
       <div className="flex gap-8 items-start">
 
         {/* ── Main content ── */}

@@ -7,30 +7,48 @@ import { ProfileForm } from "@/components/review/ProfileForm";
 import { confirmProfile } from "@/lib/api";
 import type { CVProfile, UploadResponse } from "@/lib/types";
 
-function readUploadResult(): { profile: CVProfile | null; parseWarning: string | null } {
+function normaliseProfile(profile: CVProfile): { profile: CVProfile; truncated: string[] } {
+  const truncated: string[] = [];
+  const fields = ["experience", "education", "skills", "projects", "awards", "certificates", "leadership"] as const;
+  const result = { ...profile };
+  for (const field of fields) {
+    if (!Array.isArray(profile[field])) {
+      (result as Record<string, unknown>)[field] = [];
+      truncated.push(field);
+    }
+  }
+  return { profile: result, truncated };
+}
+
+function readUploadResult(): { profile: CVProfile | null; parseWarning: string | null; truncatedSections: string[] } {
   if (typeof window === "undefined") {
-    return { profile: null, parseWarning: null };
+    return { profile: null, parseWarning: null, truncatedSections: [] };
   }
 
   const raw = sessionStorage.getItem("upload_result");
   if (!raw) {
-    return { profile: null, parseWarning: null };
+    return { profile: null, parseWarning: null, truncatedSections: [] };
   }
 
   try {
     const data: UploadResponse = JSON.parse(raw);
+    if (!data.structured) {
+      return { profile: null, parseWarning: data.parse_warning ?? null, truncatedSections: [] };
+    }
+    const { profile, truncated } = normaliseProfile(data.structured);
     return {
-      profile: data.structured,
+      profile,
       parseWarning: data.parse_warning ?? null,
+      truncatedSections: truncated,
     };
   } catch {
-    return { profile: null, parseWarning: null };
+    return { profile: null, parseWarning: null, truncatedSections: [] };
   }
 }
 
 export default function ReviewPage() {
   const router = useRouter();
-  const [{ profile, parseWarning }] = useState(readUploadResult);
+  const [{ profile, parseWarning, truncatedSections }] = useState(readUploadResult);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,7 +79,7 @@ export default function ReviewPage() {
   );
 
   return (
-    <main className="relative min-h-screen py-12 px-6 overflow-hidden">
+    <main className="relative min-h-screen overflow-x-hidden px-6 py-12">
 
       {/* Decorative arc — matches loading screen */}
       <svg
@@ -124,6 +142,13 @@ export default function ReviewPage() {
         {parseWarning && (
           <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
             <strong>Heads up:</strong> {parseWarning}
+          </div>
+        )}
+
+        {truncatedSections.length > 0 && (
+          <div className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <strong>Some sections couldn't be parsed:</strong>{" "}
+            {truncatedSections.join(", ")} — these appear empty below. You can add them manually before confirming.
           </div>
         )}
 

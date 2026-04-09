@@ -127,6 +127,9 @@ def _mock_analysis(role: str) -> AnalyzeRoleFitResponse:
         resume_improvements=[
             "Quantify the impact of internship work (e.g. 'reduced processing time by 30%')",
             "Add a Projects section showcasing 2-3 ML projects with GitHub links",
+            "Use stronger action verbs at the start of each bullet, such as built, deployed, automated, or improved",
+            "List the exact tools, libraries, and platforms used in each project so recruiters can match keywords quickly",
+            "Bring the most role-relevant experience and technical skills higher up the CV for faster scanning",
         ],
         alternative_roles=["Data Analyst", "ML Research Assistant", "Data Engineer"],
         goal_pathway={
@@ -138,5 +141,8 @@ def _mock_analysis(role: str) -> AnalyzeRoleFitResponse:
             "[CV] Python listed as primary skill — directly transferable to ML engineering",
             "[CV] Research Assistant role shows analytical thinking and experiment design",
             "[Project] Academic data analysis project demonstrates applied statistics",
+            "[Certificate] Relevant coursework and self-study can strengthen early-career ML positioning",
+            "[CV] Degree background suggests strong mathematical and technical foundations",
+            "[Project] Portfolio-style project work can compensate for limited paid industry experience",
         ],
     )

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { useRouter } from "next/navigation";
 import { LeftSidebar } from "@/components/dashboard/LeftSidebar";
 import { MainContent } from "@/components/dashboard/MainContent";
@@ -29,6 +29,9 @@ export default function DashboardPage() {
   const [highlightedSectionId, setHighlightedSectionId] = useState<string | null>(null);
   const [highlightSequence, setHighlightSequence] = useState(0);
   const highlightTimeoutRef = useRef<number | null>(null);
+  const singlePaneRef = useRef<HTMLDivElement | null>(null);
+  const currentComparePaneRef = useRef<HTMLDivElement | null>(null);
+  const targetComparePaneRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -165,6 +168,26 @@ export default function DashboardPage() {
   }
 
   function handleRecommendedAction(anchor: string) {
+    const scrollPaneToSection = (paneRef: RefObject<HTMLDivElement | null>, sectionId: string) => {
+      const pane = paneRef.current;
+      if (!pane) return;
+
+      const target = pane.querySelector<HTMLElement>(`[data-dashboard-section="${sectionId}"]`);
+      if (!target) return;
+
+      const paneTop = pane.getBoundingClientRect().top;
+      const targetTop = target.getBoundingClientRect().top;
+      const nextTop = pane.scrollTop + (targetTop - paneTop) - 20;
+      pane.scrollTo({ top: Math.max(0, nextTop), behavior: "smooth" });
+    };
+
+    if (isComparing && compareAnalysis) {
+      scrollPaneToSection(currentComparePaneRef, anchor);
+      scrollPaneToSection(targetComparePaneRef, anchor);
+    } else {
+      scrollPaneToSection(singlePaneRef, anchor);
+    }
+
     if (highlightTimeoutRef.current) {
       window.clearTimeout(highlightTimeoutRef.current);
     }
@@ -289,11 +312,11 @@ export default function DashboardPage() {
 
         {/* Content: side-by-side when comparing, single otherwise */}
         {!isSwitching && (
-          <div className="flex-1 lg:overflow-y-auto">
+          <div ref={singlePaneRef} className="flex-1 lg:overflow-y-auto">
             {isComparing && compareAnalysis ? (
               <div className="grid h-full grid-cols-1 divide-y divide-[var(--border-soft)] xl:grid-cols-2 xl:divide-x xl:divide-y-0">
                 {/* Left: current role */}
-                <div className="xl:overflow-y-auto">
+                <div ref={currentComparePaneRef} className="xl:overflow-y-auto">
                   <div className="sticky top-0 z-10 border-b border-[var(--border-soft)] bg-[var(--surface)] px-4 py-2 sm:px-6">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#8c847a]">Current</p>
                     <p className="truncate text-sm font-semibold text-[#2f2a24]">{selectedRole}</p>
@@ -307,7 +330,7 @@ export default function DashboardPage() {
                   />
                 </div>
                 {/* Right: compared role */}
-                <div className="xl:overflow-y-auto">
+                <div ref={targetComparePaneRef} className="xl:overflow-y-auto">
                   <div className="sticky top-0 z-10 border-b border-[#d9e3ea] bg-[#eef3f6] px-4 py-2 sm:px-6">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#708697]">Comparing</p>
                     <p className="truncate text-sm font-semibold text-[#2f4b61]">{compareRole}</p>
@@ -316,6 +339,8 @@ export default function DashboardPage() {
                     data={compareAnalysis}
                     profileId={profileId}
                     selectedRole={compareRole}
+                    highlightedSectionId={highlightedSectionId}
+                    highlightSequence={highlightSequence}
                   />
                 </div>
               </div>
@@ -348,7 +373,7 @@ export default function DashboardPage() {
         <button
           onClick={() => setRightPanelOpen(prev => !prev)}
           title={rightPanelOpen ? "Close panel" : "Open panel"}
-          className="fixed right-0 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-l-lg border border-r-0 border-[var(--border-soft)] bg-[var(--surface)] px-2 py-4 text-[#7a7268] shadow transition-colors hover:bg-[#f8fbfc] hover:text-[#3f5e78] lg:flex"
+          className="fixed right-0 top-1/2 z-20 hidden -translate-y-1/2 items-center justify-center rounded-l-lg border border-r-0 border-[#c7d7e3] bg-[#eef3f6] px-2 py-4 text-[#3f5e78] shadow transition-colors hover:bg-[#e3edf3] hover:text-[#2f4b61] lg:flex"
         >
           <span className="text-base leading-none">{rightPanelOpen ? "›" : "‹"}</span>
         </button>

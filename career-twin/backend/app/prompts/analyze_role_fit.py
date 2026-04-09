@@ -23,13 +23,15 @@ Return a single JSON object with EXACTLY these fields:
   ],
   "learning_steps": ["step 1", "step 2", "step 3", "step 4"],
   "possible_projects": ["Project name: one sentence description", "Project name: one sentence description", "Project name: one sentence description"],
-  "resume_improvements": ["improvement 1", "improvement 2"],
+  "resume_improvements": ["improvement 1", "improvement 2", "improvement 3", "improvement 4", "improvement 5"],
   "alternative_roles": ["Role A", "Role B"],
   "goal_pathway": {{"short_term": "0-6 months goal", "mid_term": "6-18 months goal", "long_term": "2-4 years goal"}},
   "evidence_items": [
     "[CV] CV line that shows a directly transferable skill or experience",
     "[Project] A project or portfolio item that demonstrates relevant work",
-    "[Certificate] A certification or course that supports readiness"
+    "[Certificate] A certification or course that supports readiness",
+    "[CV] Another concrete CV detail tied to the target role",
+    "[Project] Another project or achievement that strengthens the case"
   ]
 }}
 
@@ -63,8 +65,12 @@ MANDATORY RULES:
 - Do NOT award 80+ to be kind. Reserve high scores for candidates who truly earn them.
 - Do NOT include match_score in your output — it is calculated separately.
 - All list fields must have at least 2 items.
+- resume_improvements should usually contain 5 concise, high-signal CV tips unless the CV is extremely sparse.
+- evidence_items should usually contain 5 to 6 items drawn from across CV lines, projects, and certificates when evidence exists.
 - Every item in possible_projects MUST use a specific project title before the colon. Never use generic placeholders like "Project", "Project Idea", or "Case Study" as the title.
 - Every evidence_items entry MUST start with exactly one of: [CV], [Project], or [Certificate].
+- Prefer evidence_items that are concrete and role-relevant rather than generic praise. Reference measurable achievements, tools, domains, coursework, projects, certifications, awards, or leadership proof when present.
+- resume_improvements must be specific, recruiter-useful CV advice. Prioritise metrics, action verbs, role keywords, project outcomes, technical specificity, and section clarity.
 - Return ONLY valid JSON. No markdown, no commentary.
 
 TARGET ROLE: {role}

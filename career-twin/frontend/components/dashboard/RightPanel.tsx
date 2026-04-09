@@ -10,10 +10,6 @@ const ACTIONS = [
   { label: "Goal Pathway",          anchor: "goal-pathway" },
 ];
 
-function scrollTo(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
 export function RightPanel({ evidenceItems, resumeImprovements, onActionSelect }: RightPanelProps) {
   const displayEvidence = evidenceItems.map((item) =>
     item.replace(/^\[(?:CV|Project|Certificate)\]\s*/, "")
@@ -42,10 +38,7 @@ export function RightPanel({ evidenceItems, resumeImprovements, onActionSelect }
             {ACTIONS.map((action) => (
               <button
                 key={action.anchor}
-                onClick={() => {
-                  scrollTo(action.anchor);
-                  onActionSelect?.(action.anchor);
-                }}
+                onClick={() => onActionSelect?.(action.anchor)}
                 className="group flex w-full items-center justify-between rounded-xl border border-[var(--border-soft)] bg-[#fcfbf8] px-3 py-2.5 text-left text-xs font-medium text-[#4b443d] transition-colors hover:border-[#cfd9e1] hover:bg-[#f8fbfc]"
               >
                 <span>{action.label}</span>

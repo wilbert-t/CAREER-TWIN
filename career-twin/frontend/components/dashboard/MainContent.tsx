@@ -29,6 +29,7 @@ function Section({
     <div
       key={id ? `${id}-${highlightKey}` : undefined}
       id={id}
+      data-dashboard-section={id}
       className={[
         "mb-10 scroll-mt-24 rounded-[28px] px-3 py-3 transition-all duration-500 sm:px-4",
         isHighlighted

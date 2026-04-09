@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { CVProfile, Experience, Education } from "@/lib/types";
 
 const NAV_SECTIONS = [
-  { id: "upload", label: "Upload and Parse CV", kind: "action" },
+  { id: "upload", label: "Upload and Parse CV" },
   { id: "personal",  label: "Personal Information" },
   { id: "skills",    label: "Skills" },
   { id: "education", label: "Education Background" },
@@ -176,7 +176,12 @@ export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps)
 
           <section id="projects" className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden scroll-mt-24">
             <SectionHeader label="Projects" />
-            <div className="p-6">
+            <div className="px-6 pt-4">
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
+                Shown for reference only — edits here don't affect your career analysis.
+              </p>
+            </div>
+            <div className="p-6 pt-0">
               <EditableList
                 items={profile.projects}
                 emptyLabel="No projects extracted yet."
@@ -189,7 +194,12 @@ export function ProfileForm({ initial, onConfirm, isLoading }: ProfileFormProps)
 
           <section id="awards" className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden scroll-mt-24">
             <SectionHeader label="Awards & Certifications" />
-            <div className="space-y-6 p-6">
+            <div className="px-6 pt-4">
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-4">
+                Shown for reference only — edits here don't affect your career analysis.
+              </p>
+            </div>
+            <div className="space-y-6 px-6 pb-6">
               <div className="space-y-2">
                 <p className="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">Awards</p>
                 <EditableList

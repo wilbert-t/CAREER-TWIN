@@ -32,6 +32,7 @@ ui.md
 
 # Claude Code
 .superpowers/
+.claude/.claude-session-log*.md
 
 # ChromaDB local vector store
 career-twin/backend/chroma_db/

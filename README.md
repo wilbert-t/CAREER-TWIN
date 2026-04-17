@@ -2,6 +2,9 @@
 
 An AI career strategist for university students. Upload your CV and get personalised career path recommendations, skills gap analysis, portfolio project ideas, and a step-by-step action plan.
 
+## Our goal
+We, as students looking for internships/jobs, are always faced with CV issues. Let it be unable to identify lacking info, don't know how to tailor our CV according to the position or even being rejeced from a specific position multiple times but unsure of other alternatives, we got you covered. Career Twin is built in hopes that directionless students don't have to go through the bad experiences that we've been through. Sit down, buckle up, and we hope you'll enjoy this journey with us.
+
 ## What it does
 
 1. **Upload your CV** — drag and drop a PDF or DOCX
